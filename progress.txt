@@ -1,0 +1,24 @@
+### PHASE 1: Architecture & Scalable DB Design ###
+Status: In Progress
+
+Architecture Decisions Lock-in:
+- Workout Structure: Flexible Block System (Programs -> Phases -> Workouts -> Exercises).
+- Progression: Granular Set-Level Logging (Tracking weight, reps, RPE per individual set).
+- AI/RAG Context: Exercise-Specific Notes logged precisely to the movement during a session.
+- Template System: Programs support global templates (e.g., Bro Split) and custom user-built plans via an `is_template` database flag.
+- Core Stack: PostgreSQL, Spring Boot (Java), Angular (TypeScript), Docker.
+
+### PHASE 1: Architecture & Scalable DB Design ###
+Status: COMPLETED
+
+### PHASE 2: Optimized Backend CRUD & DTOs ###
+Status: In Progress
+
+Backend Architecture Convention (Layered Design):
+- controllers/ : Handles incoming HTTP requests and responses.
+- services/ : Contains all business rules and logic.
+- repositories/ : Handles direct PostgreSQL database queries.
+- entities/ : Maps exactly to our database tables.
+- dtos/ : Data Transfer Objects. Controls exactly what data enters the API and what the frontend is allowed to see.
+- exceptions/ : Centralized, global error handling.
+

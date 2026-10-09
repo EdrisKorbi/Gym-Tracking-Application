@@ -1,0 +1,27 @@
+# Compiled Java artifacts & Maven build output
+**/target/
+**/.mvn/
+**/mvnw
+**/mvnw.cmd
+
+# IntelliJ IDEA project metadata & local cache
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+# Operating System files
+.DS_Store
+Thumbs.db
+
+# Node / Angular dependencies (for Phase 3)
+**/node_modules/
+**/dist/
+.angular/
+
+# Log files
+*.log
+
+# Explicitly track all text files (planning, prompts, progress logs)
+!*.txt
