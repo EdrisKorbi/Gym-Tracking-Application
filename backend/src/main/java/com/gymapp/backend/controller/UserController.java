@@ -3,6 +3,7 @@ package com.gymapp.backend.controller;
 import com.gymapp.backend.dto.UserRegistrationDTO;
 import com.gymapp.backend.dto.UserResponseDTO;
 import com.gymapp.backend.service.UserService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,8 +18,9 @@ public class UserController {
         this.userService = userService;
     }
 
+    // @Valid instructs Spring to run validation constraints on registrationDTO before entering the method
     @PostMapping("/register")
-    public ResponseEntity<UserResponseDTO> registerUser(@RequestBody UserRegistrationDTO registrationDTO) {
+    public ResponseEntity<UserResponseDTO> registerUser(@Valid @RequestBody UserRegistrationDTO registrationDTO) {
         UserResponseDTO responseDTO = userService.registerUser(registrationDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO);
     }
