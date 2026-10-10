@@ -1,0 +1,24 @@
+{
+  "name": "Heavy Leg Day",
+  "date": "2026-10-10T18:30:00",
+  "exercises": [
+    {
+      "name": "Barbell Squat",
+      "sets": 4,
+      "reps": 8,
+      "weight": 225.0
+    },
+    {
+      "name": "Leg Press",
+      "sets": 3,
+      "reps": 12,
+      "weight": 400.0
+    },
+    {
+      "name": "Calf Raises",
+      "sets": 4,
+      "reps": 15,
+      "weight": 90.0
+    }
+  ]
+}
