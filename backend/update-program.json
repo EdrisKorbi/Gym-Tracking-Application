@@ -1,0 +1,28 @@
+{
+  "name": "12-Week Powerbuilding Blueprint (EDITED)",
+  "description": "Updated description.",
+  "isTemplate": true,
+  "phases": [
+    {
+      "id": "95f3b3d8-1e52-4102-9e68-54fd7bb39ec8",
+      "name": "Month 1: Hypertrophy Base",
+      "phaseOrder": 1,
+      "routines": [
+        {
+          "id": "d5883b78-c83c-438b-8c2b-6b1c9410ce8f",
+          "name": "Push Day (Chest, Shoulders, Triceps)",
+          "dayNumber": 1,
+          "routineExercises": [
+            {
+              "id": "b98a1d0c-5034-47a8-a230-84996c802f40",
+              "name": "Barbell Bench Press",
+              "targetSets": 4,
+              "targetReps": 5,
+              "exerciseOrder": 0
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

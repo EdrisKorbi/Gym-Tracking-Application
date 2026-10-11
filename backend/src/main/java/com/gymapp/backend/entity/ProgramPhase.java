@@ -1,6 +1,8 @@
 package com.gymapp.backend.entity;
 
 import jakarta.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -21,6 +23,10 @@ public class ProgramPhase {
     @Column(name = "phase_order", nullable = false)
     private Integer phaseOrder;
 
+    // This is the missing relationship block your service is trying to access
+    @OneToMany(mappedBy = "phase", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Routine> routines = new ArrayList<>();
+
     // Getters and Setters
     public UUID getId() { return id; }
     public void setId(UUID id) { this.id = id; }
@@ -33,4 +39,8 @@ public class ProgramPhase {
 
     public Integer getPhaseOrder() { return phaseOrder; }
     public void setPhaseOrder(Integer phaseOrder) { this.phaseOrder = phaseOrder; }
+
+    // These are the missing methods your IDE is complaining about
+    public List<Routine> getRoutines() { return routines; }
+    public void setRoutines(List<Routine> routines) { this.routines = routines; }
 }

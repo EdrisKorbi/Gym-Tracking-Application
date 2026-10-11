@@ -55,8 +55,8 @@ CREATE TABLE routine_exercises (
 CREATE TABLE workouts (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID REFERENCES users(id) ON DELETE CASCADE,
-    routine_id UUID REFERENCES routines(id) ON DELETE SET NULL, -- Populated if generated from a blueprint[cite: 6]
-    phase_id UUID REFERENCES program_phases(id) ON DELETE SET NULL, -- Populated if custom but tied to a phase[cite: 6]
+    routine_id UUID REFERENCES routines(id) ON DELETE SET NULL, -- Populated if generated from a blueprint
+    phase_id UUID REFERENCES program_phases(id) ON DELETE SET NULL, -- Populated if custom but tied to a phase
     name VARCHAR(100) NOT NULL,
     date TIMESTAMP NOT NULL,
     status VARCHAR(20) DEFAULT 'COMPLETED' -- NEW: Supports calendar scheduling and skipped days

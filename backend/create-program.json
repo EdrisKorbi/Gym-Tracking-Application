@@ -1,0 +1,43 @@
+{
+  "name": "12-Week Powerbuilding Blueprint",
+  "description": "A hybrid program focusing on both strength and hypertrophy.",
+  "isTemplate": true,
+  "phases": [
+    {
+      "name": "Month 1: Hypertrophy Base",
+      "phaseOrder": 1,
+      "routines": [
+        {
+          "name": "Push Day (Chest, Shoulders, Triceps)",
+          "dayNumber": 1,
+          "routineExercises": [
+            {
+              "name": "Barbell Bench Press",
+              "targetSets": 4,
+              "targetReps": 10,
+              "exerciseOrder": 0
+            },
+            {
+              "name": "Incline Dumbbell Press",
+              "targetSets": 3,
+              "targetReps": 12,
+              "exerciseOrder": 1
+            }
+          ]
+        },
+        {
+          "name": "Pull Day (Back, Biceps)",
+          "dayNumber": 2,
+          "routineExercises": [
+            {
+              "name": "Barbell Rows",
+              "targetSets": 4,
+              "targetReps": 8,
+              "exerciseOrder": 0
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
