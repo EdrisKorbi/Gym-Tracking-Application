@@ -1,0 +1,19 @@
+{
+  "name": "Modified Leg Day",
+  "date": "2026-10-11T19:00:00",
+  "exercises": [
+    {
+      "id": "dd07fa08-6e4f-41db-8267-e18810c15ca2",
+      "name": "Barbell Squat",
+      "sets": 4,
+      "reps": 8,
+      "weight": 235.0
+    },
+    {
+      "name": "Walking Lunges",
+      "sets": 3,
+      "reps": 10,
+      "weight": 40.0
+    }
+  ]
+}

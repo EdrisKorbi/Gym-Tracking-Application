@@ -3,8 +3,12 @@ package com.gymapp.backend.dto;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import java.util.UUID;
 
 public class ExerciseRequestDTO {
+
+    // NEW FIELD: Used to identify existing exercises during a PUT request
+    private UUID id;
 
     @NotBlank(message = "Exercise name is required")
     private String name;
@@ -20,6 +24,10 @@ public class ExerciseRequestDTO {
     @NotNull(message = "Weight is required")
     @Min(value = 0, message = "Weight cannot be negative")
     private Double weight;
+
+    // Getters and Setters
+    public UUID getId() { return id; }
+    public void setId(UUID id) { this.id = id; }
 
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }

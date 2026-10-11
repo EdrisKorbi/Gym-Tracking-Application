@@ -1,4 +1,4 @@
--- 1. Users Table (UUID primary key + authentication & profile fields)
+-- 1. Users Table (Identity & Security)
 CREATE TABLE users (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     email VARCHAR(255) UNIQUE NOT NULL,
@@ -8,75 +8,78 @@ CREATE TABLE users (
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 2. Exercises Dictionary
-CREATE TABLE exercises (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(100) UNIQUE NOT NULL,
-    target_muscle VARCHAR(50) NOT NULL
-);
+-- ==========================================
+-- PHASE 3: PROGRAMMING & BLUEPRINTS
+-- ==========================================
 
--- 3. Programs (Templates & Custom)
+-- 2. Programs (Macrocycle: e.g., "12-Week Powerbuilding")
 CREATE TABLE programs (
-    id SERIAL PRIMARY KEY,
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID REFERENCES users(id) ON DELETE CASCADE,
     name VARCHAR(100) NOT NULL,
+    description TEXT,
     is_template BOOLEAN DEFAULT FALSE
 );
 
--- 4. Program Phases
+-- 3. Program Phases (Mesocycle: e.g., "Month 1: Hypertrophy")
 CREATE TABLE program_phases (
-    id SERIAL PRIMARY KEY,
-    program_id INTEGER REFERENCES programs(id) ON DELETE CASCADE,
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    program_id UUID REFERENCES programs(id) ON DELETE CASCADE,
     name VARCHAR(100) NOT NULL,
     phase_order INTEGER NOT NULL
 );
 
--- 5. Workouts
-CREATE TABLE workouts (
-    id SERIAL PRIMARY KEY,
-    phase_id INTEGER REFERENCES program_phases(id) ON DELETE CASCADE,
+-- 4. Routines (Microcycle/Blueprint: e.g., "Push Day")
+CREATE TABLE routines (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    phase_id UUID REFERENCES program_phases(id) ON DELETE CASCADE,
     name VARCHAR(100) NOT NULL,
     day_number INTEGER NOT NULL
 );
 
--- 6. Workout Exercises (Targets)
-CREATE TABLE workout_exercises (
-    id SERIAL PRIMARY KEY,
-    workout_id INTEGER REFERENCES workouts(id) ON DELETE CASCADE,
-    exercise_id INTEGER REFERENCES exercises(id) ON DELETE RESTRICT,
+-- 5. Routine Exercises (The planned targets for the routine)
+CREATE TABLE routine_exercises (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    routine_id UUID REFERENCES routines(id) ON DELETE CASCADE,
+    name VARCHAR(100) NOT NULL,
     target_sets INTEGER NOT NULL,
-    target_reps VARCHAR(50) NOT NULL
+    target_reps INTEGER NOT NULL,
+    exercise_order INTEGER DEFAULT 0 -- NEW: Guarantees list sequencing
 );
 
--- 7. Workout Sessions (Actual Gym Visits)
-CREATE TABLE workout_sessions (
-    id SERIAL PRIMARY KEY,
+-- ==========================================
+-- PHASE 2: ACTUAL LOGGED DATA
+-- ==========================================
+
+-- 6. Workouts (The actual gym visit)
+CREATE TABLE workouts (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID REFERENCES users(id) ON DELETE CASCADE,
-    workout_id INTEGER REFERENCES workouts(id) ON DELETE SET NULL,
-    session_date DATE NOT NULL DEFAULT CURRENT_DATE
+    routine_id UUID REFERENCES routines(id) ON DELETE SET NULL, -- Populated if generated from a blueprint[cite: 6]
+    phase_id UUID REFERENCES program_phases(id) ON DELETE SET NULL, -- Populated if custom but tied to a phase[cite: 6]
+    name VARCHAR(100) NOT NULL,
+    date TIMESTAMP NOT NULL,
+    status VARCHAR(20) DEFAULT 'COMPLETED' -- NEW: Supports calendar scheduling and skipped days
 );
 
--- 8. Set Logs (Granular Tracking)
-CREATE TABLE set_logs (
-    id SERIAL PRIMARY KEY,
-    session_id INTEGER REFERENCES workout_sessions(id) ON DELETE CASCADE,
-    workout_exercise_id INTEGER REFERENCES workout_exercises(id) ON DELETE CASCADE,
-    set_number INTEGER NOT NULL,
-    weight NUMERIC(6,2) NOT NULL,
+-- 7. Exercises (The actual logged metrics)
+CREATE TABLE exercises (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    workout_id UUID REFERENCES workouts(id) ON DELETE CASCADE,
+    name VARCHAR(100) NOT NULL,
+    sets INTEGER NOT NULL,
     reps INTEGER NOT NULL,
-    rpe NUMERIC(3,1)
+    weight DOUBLE PRECISION NOT NULL,
+    exercise_order INTEGER DEFAULT 0 -- NEW: Guarantees list sequencing
 );
 
--- 9. Exercise Notes (For AI/RAG)
-CREATE TABLE exercise_notes (
-    id SERIAL PRIMARY KEY,
-    session_id INTEGER REFERENCES workout_sessions(id) ON DELETE CASCADE,
-    exercise_id INTEGER REFERENCES exercises(id) ON DELETE CASCADE,
-    note_text TEXT NOT NULL,
-    created_at TIMESTAMPTZ DEFAULT NOW()
-);
-
--- 10. Performance Indexes
+-- ==========================================
+-- PERFORMANCE INDEXES
+-- ==========================================
 CREATE INDEX idx_programs_user_id ON programs(user_id);
-CREATE INDEX idx_sessions_user_id ON workout_sessions(user_id);
-CREATE INDEX idx_set_logs_session_id ON set_logs(session_id);
+CREATE INDEX idx_phases_program_id ON program_phases(program_id);
+CREATE INDEX idx_routines_phase_id ON routines(phase_id);
+CREATE INDEX idx_workouts_user_id ON workouts(user_id);
+CREATE INDEX idx_workouts_routine_id ON workouts(routine_id);
+CREATE INDEX idx_workouts_phase_id ON workouts(phase_id); 
+CREATE INDEX idx_exercises_workout_id ON exercises(workout_id);
