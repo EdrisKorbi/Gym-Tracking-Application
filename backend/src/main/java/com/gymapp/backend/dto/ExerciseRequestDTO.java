@@ -7,7 +7,7 @@ import java.util.UUID;
 
 public class ExerciseRequestDTO {
 
-    // NEW FIELD: Used to identify existing exercises during a PUT request
+    // Used to identify existing exercises during a PUT request
     private UUID id;
 
     @NotBlank(message = "Exercise name is required")
@@ -25,6 +25,10 @@ public class ExerciseRequestDTO {
     @Min(value = 0, message = "Weight cannot be negative")
     private Double weight;
 
+    @NotNull(message = "Exercise order is required")
+    @Min(value = 0, message = "Exercise order cannot be negative")
+    private Integer exerciseOrder; // Guarantees explicit list sequencing
+
     // Getters and Setters
     public UUID getId() { return id; }
     public void setId(UUID id) { this.id = id; }
@@ -40,4 +44,7 @@ public class ExerciseRequestDTO {
 
     public Double getWeight() { return weight; }
     public void setWeight(Double weight) { this.weight = weight; }
+
+    public Integer getExerciseOrder() { return exerciseOrder; }
+    public void setExerciseOrder(Integer exerciseOrder) { this.exerciseOrder = exerciseOrder; }
 }

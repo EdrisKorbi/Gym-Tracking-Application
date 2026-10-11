@@ -1,18 +1,21 @@
 {
-  "name": "Heavy Leg Day",
-  "date": "2026-10-11T18:30:00",
+  "name": "Phase 3 Test Workout",
+  "date": "2026-10-11T15:00:00",
+  "status": "COMPLETED",
   "exercises": [
     {
-      "name": "Barbell Squat",
-      "sets": 4,
-      "reps": 8,
-      "weight": 225.0
+      "name": "Bench Press",
+      "sets": 3,
+      "reps": 10,
+      "weight": 225.0,
+      "exerciseOrder": 0
     },
     {
-      "name": "Leg Press",
-      "sets": 3,
-      "reps": 12,
-      "weight": 400.0
+      "name": "Squat",
+      "sets": 4,
+      "reps": 8,
+      "weight": 315.0,
+      "exerciseOrder": 1
     }
   ]
 }

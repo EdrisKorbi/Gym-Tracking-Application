@@ -1,19 +1,22 @@
 {
-  "name": "Modified Leg Day",
-  "date": "2026-10-11T19:00:00",
+  "name": "Phase 3 Test Workout (Updated)",
+  "date": "2026-10-11T15:00:00",
+  "status": "IN_PROGRESS",
   "exercises": [
     {
-      "id": "dd07fa08-6e4f-41db-8267-e18810c15ca2",
-      "name": "Barbell Squat",
-      "sets": 4,
-      "reps": 8,
-      "weight": 235.0
-    },
-    {
-      "name": "Walking Lunges",
+      "id": "29b3880d-0933-4acf-b908-3d04a6483470",
+      "name": "Bench Press",
       "sets": 3,
       "reps": 10,
-      "weight": 40.0
+      "weight": 230.0,
+      "exerciseOrder": 0
+    },
+    {
+      "name": "Deadlift",
+      "sets": 1,
+      "reps": 5,
+      "weight": 405.0,
+      "exerciseOrder": 1
     }
   ]
 }

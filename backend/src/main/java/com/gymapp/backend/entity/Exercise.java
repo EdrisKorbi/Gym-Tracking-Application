@@ -27,6 +27,9 @@ public class Exercise {
     @Column(nullable = false)
     private Double weight;
 
+    @Column(name = "exercise_order")
+    private Integer exerciseOrder = 0; // Guarantees explicit list sequencing
+
     // Getters and Setters
     public UUID getId() { return id; }
     public void setId(UUID id) { this.id = id; }
@@ -45,4 +48,7 @@ public class Exercise {
 
     public Double getWeight() { return weight; }
     public void setWeight(Double weight) { this.weight = weight; }
+
+    public Integer getExerciseOrder() { return exerciseOrder; }
+    public void setExerciseOrder(Integer exerciseOrder) { this.exerciseOrder = exerciseOrder; }
 }
