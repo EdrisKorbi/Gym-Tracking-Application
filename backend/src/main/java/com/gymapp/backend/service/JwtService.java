@@ -43,6 +43,16 @@ public class JwtService {
                 .getSubject();
     }
 
+    // Extracts the user UUID from the token payload
+    public String extractUserId(String token) {
+        return Jwts.parser()
+                .verifyWith(getSigningKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload()
+                .get("userId", String.class);
+    }
+
     // Validates the token's signature and checks if it is expired
     public boolean isTokenValid(String token) {
         try {

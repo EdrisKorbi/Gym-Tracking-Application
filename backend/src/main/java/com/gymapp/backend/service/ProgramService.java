@@ -6,6 +6,8 @@ import com.gymapp.backend.repository.ProgramRepository;
 import com.gymapp.backend.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.gymapp.backend.exception.ResourceNotFoundException;
+import com.gymapp.backend.exception.AccessDeniedException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,12 +27,12 @@ public class ProgramService {
     }
 
     @Transactional
-    public ProgramResponseDTO createProgram(String email, ProgramRequestDTO requestDTO) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+    public ProgramResponseDTO createProgram(UUID userId, ProgramRequestDTO requestDTO) {
+        // PERFORMANCE WIN: Proxy reference instead of SELECT query
+        User userProxy = userRepository.getReferenceById(userId);
 
         Program program = new Program();
-        program.setUser(user);
+        program.setUser(userProxy);
         program.setName(requestDTO.getName());
         program.setDescription(requestDTO.getDescription());
         program.setIsTemplate(requestDTO.getIsTemplate());
@@ -63,28 +65,22 @@ public class ProgramService {
         }
 
         Program savedProgram = programRepository.save(program);
-
         return mapToResponseDTO(savedProgram);
     }
 
     @Transactional
-    public ProgramResponseDTO updateProgram(String email, UUID programId, ProgramRequestDTO requestDTO) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
+    public ProgramResponseDTO updateProgram(UUID userId, UUID programId, ProgramRequestDTO requestDTO) {
         Program program = programRepository.findById(programId)
-                .orElseThrow(() -> new RuntimeException("Program not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Program not found"));
 
-        if (!program.getUser().getId().equals(user.getId())) {
-            throw new RuntimeException("Access denied: You do not own this program");
+        if (!program.getUser().getId().equals(userId)) {
+            throw new AccessDeniedException("Access denied: You do not own this program");
         }
 
-        // 1. Update top-level Program fields
         program.setName(requestDTO.getName());
         program.setDescription(requestDTO.getDescription());
         program.setIsTemplate(requestDTO.getIsTemplate());
 
-        // 2. Diff/Merge Level 1: Program Phases
         Map<UUID, ProgramPhase> phaseMap = program.getPhases().stream()
                 .collect(Collectors.toMap(ProgramPhase::getId, p -> p));
         program.getPhases().clear();
@@ -92,17 +88,16 @@ public class ProgramService {
         for (ProgramPhaseRequestDTO phaseDto : requestDTO.getPhases()) {
             ProgramPhase phase;
             if (phaseDto.getId() != null && phaseMap.containsKey(phaseDto.getId())) {
-                phase = phaseMap.get(phaseDto.getId()); // UPDATE existing
+                phase = phaseMap.get(phaseDto.getId());
                 phase.setName(phaseDto.getName());
                 phase.setPhaseOrder(phaseDto.getPhaseOrder());
             } else {
-                phase = new ProgramPhase(); // INSERT new
+                phase = new ProgramPhase();
                 phase.setProgram(program);
                 phase.setName(phaseDto.getName());
                 phase.setPhaseOrder(phaseDto.getPhaseOrder());
             }
 
-            // 3. Diff/Merge Level 2: Routines (inside the Phase)
             Map<UUID, Routine> routineMap = phase.getRoutines().stream()
                     .collect(Collectors.toMap(Routine::getId, r -> r));
             phase.getRoutines().clear();
@@ -110,17 +105,16 @@ public class ProgramService {
             for (RoutineRequestDTO routineDto : phaseDto.getRoutines()) {
                 Routine routine;
                 if (routineDto.getId() != null && routineMap.containsKey(routineDto.getId())) {
-                    routine = routineMap.get(routineDto.getId()); // UPDATE existing
+                    routine = routineMap.get(routineDto.getId());
                     routine.setName(routineDto.getName());
                     routine.setDayNumber(routineDto.getDayNumber());
                 } else {
-                    routine = new Routine(); // INSERT new
+                    routine = new Routine();
                     routine.setPhase(phase);
                     routine.setName(routineDto.getName());
                     routine.setDayNumber(routineDto.getDayNumber());
                 }
 
-                // 4. Diff/Merge Level 3: Routine Exercises (inside the Routine)
                 Map<UUID, RoutineExercise> targetMap = routine.getRoutineExercises().stream()
                         .collect(Collectors.toMap(RoutineExercise::getId, t -> t));
                 routine.getRoutineExercises().clear();
@@ -128,13 +122,13 @@ public class ProgramService {
                 for (RoutineExerciseRequestDTO targetDto : routineDto.getRoutineExercises()) {
                     RoutineExercise target;
                     if (targetDto.getId() != null && targetMap.containsKey(targetDto.getId())) {
-                        target = targetMap.get(targetDto.getId()); // UPDATE existing
+                        target = targetMap.get(targetDto.getId());
                         target.setName(targetDto.getName());
                         target.setTargetSets(targetDto.getTargetSets());
                         target.setTargetReps(targetDto.getTargetReps());
                         target.setExerciseOrder(targetDto.getExerciseOrder());
                     } else {
-                        target = new RoutineExercise(); // INSERT new
+                        target = new RoutineExercise();
                         target.setRoutine(routine);
                         target.setName(targetDto.getName());
                         target.setTargetSets(targetDto.getTargetSets());
@@ -148,51 +142,35 @@ public class ProgramService {
             program.getPhases().add(phase);
         }
 
-        // Save cascades all updates, inserts, and deletions safely
         Program updatedProgram = programRepository.save(program);
         return mapToResponseDTO(updatedProgram);
     }
 
     @Transactional
-    public void deleteProgram(String email, UUID programId) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
+    public void deleteProgram(UUID userId, UUID programId) {
         Program program = programRepository.findById(programId)
-                .orElseThrow(() -> new RuntimeException("Program not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Program not found"));
 
-        if (!program.getUser().getId().equals(user.getId())) {
-            throw new RuntimeException("Access denied: You do not own this program");
+        if (!program.getUser().getId().equals(userId)) {
+            throw new AccessDeniedException("Access denied: You do not own this program");
         }
-
-        // Thanks to CascadeType.ALL, this deletes the Phases, Routines, and Targets automatically.
-        // Thanks to ON DELETE SET NULL, the user's historical Workouts are kept safe.
         programRepository.delete(program);
     }
 
     @Transactional(readOnly = true)
-    public List<ProgramResponseDTO> getAllPrograms(String email) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        // Fetches only the programs belonging to this specific user
-        List<Program> programs = programRepository.findByUserId(user.getId());
-
-        // Safe to use streams here because mapping does not mutate database state
+    public List<ProgramResponseDTO> getAllPrograms(UUID userId) {
+        // Direct query by UUID, completely skipping the user table lookup!
+        List<Program> programs = programRepository.findByUserId(userId);
         return programs.stream().map(this::mapToResponseDTO).toList();
     }
 
     @Transactional(readOnly = true)
-    public ProgramResponseDTO getProgramById(String email, UUID programId) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
+    public ProgramResponseDTO getProgramById(UUID userId, UUID programId) {
         Program program = programRepository.findById(programId)
-                .orElseThrow(() -> new RuntimeException("Program not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Program not found"));
 
-        // Strict security check: Prevent users from fetching other people's templates
-        if (!program.getUser().getId().equals(user.getId())) {
-            throw new RuntimeException("Access denied: You do not own this program");
+        if (!program.getUser().getId().equals(userId)) {
+            throw new AccessDeniedException("Access denied: You do not own this program");
         }
 
         return mapToResponseDTO(program);

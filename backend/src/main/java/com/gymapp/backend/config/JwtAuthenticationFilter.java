@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.UUID;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -30,21 +30,30 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         // 1. Check if the request has an Authorization header with a Bearer token
         final String authHeader = request.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            filterChain.doFilter(request, response); // Move on to the next filter
+            filterChain.doFilter(request, response);
             return;
         }
 
-        // 2. Extract the token (Remove "Bearer " from the string)
+        // 2. Extract the token
         final String jwt = authHeader.substring(7);
 
-        // 3. Validate the token (This is where the expiration is checked!)
+        // 3. Validate the token
         if (jwtService.isTokenValid(jwt)) {
             String email = jwtService.extractEmail(jwt);
+            String userIdString = jwtService.extractUserId(jwt); // NEW: Extract the UUID
 
-            // 4. If valid, tell Spring Security that this user is authenticated
-            if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            // 4. Create our Custom Profile Card if not already authenticated
+            if (email != null && userIdString != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+
+                // Convert the String from the JWT back into a real Java UUID
+                UUID userId = UUID.fromString(userIdString);
+
+                // Create our custom profile
+                CustomUserDetails userDetails = new CustomUserDetails(userId, email);
+
+                // Pass the ENTIRE userDetails object into Spring Security, not just the email
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                        email, null, new ArrayList<>()); // We aren't using roles yet, so we pass an empty list
+                        userDetails, null, userDetails.getAuthorities());
 
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);

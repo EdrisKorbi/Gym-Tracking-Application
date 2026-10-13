@@ -23,7 +23,6 @@ public class ProgramPhase {
     @Column(name = "phase_order", nullable = false)
     private Integer phaseOrder;
 
-    // This is the missing relationship block your service is trying to access
     @OneToMany(mappedBy = "phase", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Routine> routines = new ArrayList<>();
 
