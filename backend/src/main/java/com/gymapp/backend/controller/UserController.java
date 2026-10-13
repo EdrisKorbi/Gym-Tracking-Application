@@ -1,6 +1,7 @@
 package com.gymapp.backend.controller;
 
 import com.gymapp.backend.config.CustomUserDetails;
+import com.gymapp.backend.dto.ApiResponse;
 import com.gymapp.backend.dto.AuthResponseDTO;
 import com.gymapp.backend.dto.UserLoginDTO;
 import com.gymapp.backend.dto.UserRegistrationDTO;
@@ -23,22 +24,28 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<UserResponseDTO> registerUser(@Valid @RequestBody UserRegistrationDTO registrationDTO) {
+    public ResponseEntity<ApiResponse<UserResponseDTO>> registerUser(@Valid @RequestBody UserRegistrationDTO registrationDTO) {
         UserResponseDTO responseDTO = userService.registerUser(registrationDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(
+                ApiResponse.success("User registered successfully", responseDTO)
+        );
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponseDTO> loginUser(@Valid @RequestBody UserLoginDTO loginDTO) {
+    public ResponseEntity<ApiResponse<AuthResponseDTO>> loginUser(@Valid @RequestBody UserLoginDTO loginDTO) {
         AuthResponseDTO token = userService.loginUser(loginDTO);
-        return ResponseEntity.ok(token);
+        return ResponseEntity.ok(
+                ApiResponse.success("Login successful", token)
+        );
     }
 
     @GetMapping("/me")
-    public ResponseEntity<UserResponseDTO> getUserProfile(
+    public ResponseEntity<ApiResponse<UserResponseDTO>> getUserProfile(
             @AuthenticationPrincipal CustomUserDetails currentUser) {
 
         UserResponseDTO profile = userService.getUserProfile(currentUser.getId());
-        return ResponseEntity.ok(profile);
+        return ResponseEntity.ok(
+                ApiResponse.success("Profile retrieved successfully", profile)
+        );
     }
 }

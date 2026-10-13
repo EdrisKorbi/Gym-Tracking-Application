@@ -1,7 +1,7 @@
 package com.gymapp.backend.controller;
 
 import com.gymapp.backend.config.CustomUserDetails;
-import com.gymapp.backend.dto.MessageResponseDTO;
+import com.gymapp.backend.dto.ApiResponse;
 import com.gymapp.backend.dto.ProgramRequestDTO;
 import com.gymapp.backend.dto.ProgramResponseDTO;
 import com.gymapp.backend.dto.WorkoutGenerationRequestDTO;
@@ -15,7 +15,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -35,16 +34,16 @@ public class ProgramController {
     // ==========================================
 
     @PostMapping("/{id}/generate")
-    public ResponseEntity<MessageResponseDTO> generateWorkouts(
+    public ResponseEntity<ApiResponse<Void>> generateWorkouts(
             @PathVariable UUID id,
             @Valid @RequestBody WorkoutGenerationRequestDTO requestDTO,
             @AuthenticationPrincipal CustomUserDetails currentUser) {
 
         List<Workout> generated = workoutGenerationService.generateWorkoutsFromProgram(id, currentUser.getId(), requestDTO);
 
-        // Using our new predictable DTO instead of a Map!
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(new MessageResponseDTO("Successfully scheduled " + generated.size() + " workouts on your calendar."));
+        return ResponseEntity.status(HttpStatus.CREATED).body(
+                ApiResponse.success("Successfully scheduled " + generated.size() + " workouts on your calendar.")
+        );
     }
 
     // ==========================================
@@ -52,65 +51,78 @@ public class ProgramController {
     // ==========================================
 
     @GetMapping
-    public ResponseEntity<List<ProgramResponseDTO>> getAllPrograms(
+    public ResponseEntity<ApiResponse<List<ProgramResponseDTO>>> getAllPrograms(
             @AuthenticationPrincipal CustomUserDetails currentUser) {
 
-        // NOW PASSING THE UUID DIRECTLY!
         List<ProgramResponseDTO> programs = programService.getAllPrograms(currentUser.getId());
-        return ResponseEntity.ok(programs);
+        return ResponseEntity.ok(
+                ApiResponse.success("Programs retrieved successfully", programs)
+        );
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ProgramResponseDTO> getProgramById(
+    public ResponseEntity<ApiResponse<ProgramResponseDTO>> getProgramById(
             @PathVariable UUID id,
             @AuthenticationPrincipal CustomUserDetails currentUser) {
 
         ProgramResponseDTO program = programService.getProgramById(currentUser.getId(), id);
-        return ResponseEntity.ok(program);
+        return ResponseEntity.ok(
+                ApiResponse.success("Program retrieved successfully", program)
+        );
     }
 
     @PostMapping
-    public ResponseEntity<ProgramResponseDTO> createProgram(
+    public ResponseEntity<ApiResponse<ProgramResponseDTO>> createProgram(
             @Valid @RequestBody ProgramRequestDTO requestDTO,
             @AuthenticationPrincipal CustomUserDetails currentUser) {
 
         ProgramResponseDTO response = programService.createProgram(currentUser.getId(), requestDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(
+                ApiResponse.success("Program created successfully", response)
+        );
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ProgramResponseDTO> updateProgram(
+    public ResponseEntity<ApiResponse<ProgramResponseDTO>> updateProgram(
             @PathVariable UUID id,
             @Valid @RequestBody ProgramRequestDTO requestDTO,
             @AuthenticationPrincipal CustomUserDetails currentUser) {
 
         ProgramResponseDTO response = programService.updateProgram(currentUser.getId(), id, requestDTO);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(
+                ApiResponse.success("Program updated successfully", response)
+        );
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteProgram(
+    public ResponseEntity<ApiResponse<Void>> deleteProgram(
             @PathVariable UUID id,
             @AuthenticationPrincipal CustomUserDetails currentUser) {
 
         programService.deleteProgram(currentUser.getId(), id);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(
+                ApiResponse.success("Program deleted successfully")
+        );
     }
 
     // 1. Browse Master Templates (Available to all authenticated users)
     @GetMapping("/templates")
-    public ResponseEntity<List<ProgramResponseDTO>> getAllTemplates() {
+    public ResponseEntity<ApiResponse<List<ProgramResponseDTO>>> getAllTemplates() {
         List<ProgramResponseDTO> templates = programService.getAllTemplates();
-        return ResponseEntity.ok(templates);
+        return ResponseEntity.ok(
+                ApiResponse.success("Templates retrieved successfully", templates)
+        );
     }
 
     // 2. Clone a Template to the user's personal account
     @PostMapping("/{id}/clone")
-    public ResponseEntity<ProgramResponseDTO> cloneTemplate(
+    public ResponseEntity<ApiResponse<ProgramResponseDTO>> cloneTemplate(
             @PathVariable UUID id,
             @AuthenticationPrincipal CustomUserDetails currentUser) {
 
         ProgramResponseDTO clonedProgram = programService.cloneProgram(id, currentUser.getId());
-        return ResponseEntity.status(HttpStatus.CREATED).body(clonedProgram);
+        return ResponseEntity.status(HttpStatus.CREATED).body(
+                ApiResponse.success("Template cloned successfully", clonedProgram)
+        );
     }
 }

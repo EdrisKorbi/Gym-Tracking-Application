@@ -1,6 +1,7 @@
 package com.gymapp.backend.controller;
 
 import com.gymapp.backend.config.CustomUserDetails;
+import com.gymapp.backend.dto.ApiResponse;
 import com.gymapp.backend.dto.WorkoutRequestDTO;
 import com.gymapp.backend.dto.WorkoutResponseDTO;
 import com.gymapp.backend.service.WorkoutService;
@@ -24,47 +25,57 @@ public class WorkoutController {
     }
 
     @PostMapping
-    public ResponseEntity<WorkoutResponseDTO> logWorkout(
+    public ResponseEntity<ApiResponse<WorkoutResponseDTO>> logWorkout(
             @Valid @RequestBody WorkoutRequestDTO requestDTO,
             @AuthenticationPrincipal CustomUserDetails currentUser) {
 
         WorkoutResponseDTO response = workoutService.logWorkout(currentUser.getId(), requestDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(
+                ApiResponse.success("Workout logged successfully", response)
+        );
     }
 
     @GetMapping
-    public ResponseEntity<List<WorkoutResponseDTO>> getAllWorkouts(
+    public ResponseEntity<ApiResponse<List<WorkoutResponseDTO>>> getAllWorkouts(
             @AuthenticationPrincipal CustomUserDetails currentUser) {
 
         List<WorkoutResponseDTO> workouts = workoutService.getAllWorkouts(currentUser.getId());
-        return ResponseEntity.ok(workouts);
+        return ResponseEntity.ok(
+                ApiResponse.success("Workouts retrieved successfully", workouts)
+        );
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<WorkoutResponseDTO> getWorkoutById(
+    public ResponseEntity<ApiResponse<WorkoutResponseDTO>> getWorkoutById(
             @PathVariable UUID id,
             @AuthenticationPrincipal CustomUserDetails currentUser) {
 
         WorkoutResponseDTO workout = workoutService.getWorkoutById(currentUser.getId(), id);
-        return ResponseEntity.ok(workout);
+        return ResponseEntity.ok(
+                ApiResponse.success("Workout retrieved successfully", workout)
+        );
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<WorkoutResponseDTO> updateWorkout(
+    public ResponseEntity<ApiResponse<WorkoutResponseDTO>> updateWorkout(
             @PathVariable UUID id,
             @Valid @RequestBody WorkoutRequestDTO requestDTO,
             @AuthenticationPrincipal CustomUserDetails currentUser) {
 
         WorkoutResponseDTO response = workoutService.updateWorkout(currentUser.getId(), id, requestDTO);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(
+                ApiResponse.success("Workout updated successfully", response)
+        );
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteWorkout(
+    public ResponseEntity<ApiResponse<Void>> deleteWorkout(
             @PathVariable UUID id,
             @AuthenticationPrincipal CustomUserDetails currentUser) {
 
         workoutService.deleteWorkout(currentUser.getId(), id);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(
+                ApiResponse.success("Workout deleted successfully")
+        );
     }
 }

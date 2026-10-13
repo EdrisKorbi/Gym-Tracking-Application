@@ -73,6 +73,6 @@ scripts:
 
       let jsonData = pm.response.json();\r
 
-      pm.environment.set(\"program_id\", jsonData.id);"
+      pm.environment.set(\"program_id\", jsonData.data.id); // New way"
     language: text/javascript
 order: 3000

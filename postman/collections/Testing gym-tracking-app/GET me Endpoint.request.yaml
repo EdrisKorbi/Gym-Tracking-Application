@@ -20,7 +20,7 @@ scripts:
 
       \    let jsonData = pm.response.json();\r
 
-      \    pm.expect(jsonData).to.have.property(\"email\");\r
+      \    pm.expect(jsonData.data).to.have.property(\"email\");\r
 
       });"
     language: text/javascript

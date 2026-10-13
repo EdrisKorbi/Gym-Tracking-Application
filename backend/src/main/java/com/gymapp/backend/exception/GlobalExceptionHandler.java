@@ -1,7 +1,6 @@
 package com.gymapp.backend.exception;
 
 import com.gymapp.backend.dto.ErrorResponseDTO;
-import com.gymapp.backend.dto.MessageResponseDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;

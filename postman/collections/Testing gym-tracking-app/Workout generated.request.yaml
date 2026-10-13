@@ -20,7 +20,7 @@ scripts:
 
       \    let jsonData = pm.response.json();\r
 
-      \    pm.expect(jsonData.length).to.be.above(0);\r
+      \    pm.expect(jsonData.data.length).to.be.above(0);\r
 
       });"
     language: text/javascript
