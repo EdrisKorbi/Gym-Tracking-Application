@@ -1,6 +1,0 @@
-name: GymApp Local
-values:
-  - key: base_url
-    value: ''
-  - key: auth_token
-    value: ''

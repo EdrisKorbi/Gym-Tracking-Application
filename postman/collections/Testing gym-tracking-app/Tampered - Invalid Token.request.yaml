@@ -1,8 +1,0 @@
-$kind: http-request
-name: Tampered / Invalid Token
-description: ""
-url: "{{base_url}}/api/v1/users/me"
-method: GET
-auth:
-  type: bearer
-order: 7000

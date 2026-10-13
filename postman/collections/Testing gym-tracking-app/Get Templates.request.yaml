@@ -1,4 +1,0 @@
-$kind: http-request
-url: "{{base_url}}/api/v1/programs/templates"
-method: GET
-order: 6524
