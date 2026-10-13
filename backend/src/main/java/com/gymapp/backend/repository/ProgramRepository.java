@@ -10,4 +10,5 @@ import java.util.UUID;
 @Repository
 public interface ProgramRepository extends JpaRepository<Program, UUID> {
     List<Program> findByUserId(UUID userId);
+    List<Program> findByIsTemplateTrue();
 }

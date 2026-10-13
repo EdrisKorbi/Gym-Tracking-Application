@@ -21,9 +21,18 @@ Phase 2 Features Implemented:
 - Advanced Logic: Integrated production-grade Diff/Merge logic for in-place updates, utilizing idiomatic Java Streams and $O(1)$ Map lookups.
 
 ### PHASE 3: Macrocycles & Programming (Programs, Phases, Routines) ###
-Status: IN PROGRESS
+Status: COMPLETED
+
+Phase 3 Features Implemented:
+- Entity Architecture: Mapped `programs`, `program_phases`, `routines`, and `routine_exercises` into Spring Boot JPA Entities.
+- Execution Bridge: Updated `Workout` and `Exercise` entities to bridge Blueprints and Execution logs via `phaseId`, `routineId`, `status`, and `exerciseOrder`.
+- Cascade & Deletion: Implemented bidirectional `@OneToMany` with `CascadeType.ALL` and verified `ON DELETE SET NULL` to protect historical user logs.
+- REST API Endpoints: Full CRUD (POST, GET, PUT, DELETE) implemented for Program blueprints.
+- Advanced Logic: Engineered a 4-level nested O(1) Map Diff/Merge algorithm using standard `for` loops for safe Hibernate entity state mutation.
+
+### PHASE 4: The Workout Generation Engine & Calendar Scheduling ###
+Status: NEXT
 
 Current Objective: 
-- Map the updated Phase 3 SQL tables (`programs`, `program_phases`, `routines`, `routine_exercises`) into Spring Boot JPA Entities.
-- Update existing `Workout` and `Exercise` entities with `phaseId`, `routineId`, `status`, and `exerciseOrder` fields.
-- Establish DTOs and transactional service logic for creating multi-week workout templates.
+- Build the backend service to instantiate a Blueprint (`Program`) into reality (`PLANNED` Workouts).
+- Map planned routines to specific calendar dates based on user preference (e.g., Mon/Wed/Fri schedule) and generate the corresponding `Exercise` logs ready for future data entry.

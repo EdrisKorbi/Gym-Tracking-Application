@@ -1,0 +1,27 @@
+$kind: http-request
+description: ""
+url: "{{base_url}}/api/v1/workouts"
+method: GET
+auth:
+  type: inherit
+  credentials:
+    id: 0d82e42f-a3e7-484d-b31d-248092b6a7db
+scripts:
+  - type: afterResponse
+    code: "pm.test(\"Workouts fetched successfully (200 OK)\", function () {\r
+
+      \    pm.response.to.have.status(200);\r
+
+      });\r
+
+      \r
+
+      pm.test(\"Workouts list is not empty\", function () {\r
+
+      \    let jsonData = pm.response.json();\r
+
+      \    pm.expect(jsonData.length).to.be.above(0);\r
+
+      });"
+    language: text/javascript
+order: 5000

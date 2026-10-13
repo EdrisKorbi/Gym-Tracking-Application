@@ -96,4 +96,21 @@ public class ProgramController {
         programService.deleteProgram(currentUser.getId(), id);
         return ResponseEntity.noContent().build();
     }
+
+    // 1. Browse Master Templates (Available to all authenticated users)
+    @GetMapping("/templates")
+    public ResponseEntity<List<ProgramResponseDTO>> getAllTemplates() {
+        List<ProgramResponseDTO> templates = programService.getAllTemplates();
+        return ResponseEntity.ok(templates);
+    }
+
+    // 2. Clone a Template to the user's personal account
+    @PostMapping("/{id}/clone")
+    public ResponseEntity<ProgramResponseDTO> cloneTemplate(
+            @PathVariable UUID id,
+            @AuthenticationPrincipal CustomUserDetails currentUser) {
+
+        ProgramResponseDTO clonedProgram = programService.cloneProgram(id, currentUser.getId());
+        return ResponseEntity.status(HttpStatus.CREATED).body(clonedProgram);
+    }
 }

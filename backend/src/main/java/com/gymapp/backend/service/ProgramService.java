@@ -176,6 +176,60 @@ public class ProgramService {
         return mapToResponseDTO(program);
     }
 
+    @Transactional
+    public ProgramResponseDTO cloneProgram(UUID templateId, UUID currentUserId) {
+        Program template = programRepository.findById(templateId)
+                .orElseThrow(() -> new ResourceNotFoundException("Program not found"));
+
+        if (!template.getIsTemplate()) {
+            throw new RuntimeException("Only public templates can be cloned.");
+        }
+
+        User currentUserProxy = userRepository.getReferenceById(currentUserId);
+
+        Program clonedProgram = new Program();
+        clonedProgram.setUser(currentUserProxy);
+        clonedProgram.setName(template.getName() + " (Clone)");
+        clonedProgram.setDescription(template.getDescription());
+        clonedProgram.setIsTemplate(false);
+
+        for (ProgramPhase templatePhase : template.getPhases()) {
+            ProgramPhase clonedPhase = new ProgramPhase();
+            clonedPhase.setProgram(clonedProgram);
+            clonedPhase.setName(templatePhase.getName());
+            clonedPhase.setPhaseOrder(templatePhase.getPhaseOrder());
+
+            for (Routine templateRoutine : templatePhase.getRoutines()) {
+                Routine clonedRoutine = new Routine();
+                clonedRoutine.setPhase(clonedPhase); // Fixed: Matches your Routine entity exactly
+                clonedRoutine.setName(templateRoutine.getName());
+                clonedRoutine.setDayNumber(templateRoutine.getDayNumber());
+
+                for (RoutineExercise templateEx : templateRoutine.getRoutineExercises()) {
+                    RoutineExercise clonedEx = new RoutineExercise();
+                    clonedEx.setRoutine(clonedRoutine);
+                    clonedEx.setName(templateEx.getName());
+                    clonedEx.setTargetSets(templateEx.getTargetSets());
+                    clonedEx.setTargetReps(templateEx.getTargetReps());
+                    clonedEx.setExerciseOrder(templateEx.getExerciseOrder());
+
+                    clonedRoutine.getRoutineExercises().add(clonedEx);
+                }
+                clonedPhase.getRoutines().add(clonedRoutine);
+            }
+            clonedProgram.getPhases().add(clonedPhase);
+        }
+
+        Program savedClone = programRepository.save(clonedProgram);
+        return mapToResponseDTO(savedClone);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ProgramResponseDTO> getAllTemplates() {
+        List<Program> templates = programRepository.findByIsTemplateTrue();
+        return templates.stream().map(this::mapToResponseDTO).toList();
+    }
+
     private ProgramResponseDTO mapToResponseDTO(Program program) {
         ProgramResponseDTO response = new ProgramResponseDTO();
         response.setId(program.getId());
