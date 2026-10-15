@@ -26,6 +26,9 @@ public class Routine {
     @OneToMany(mappedBy = "routine", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<RoutineExercise> routineExercises = new ArrayList<>();
 
+    @Version
+    private Long version;
+
     // Getters and Setters
     public UUID getId() { return id; }
     public void setId(UUID id) { this.id = id; }
@@ -41,4 +44,7 @@ public class Routine {
 
     public List<RoutineExercise> getRoutineExercises() { return routineExercises; }
     public void setRoutineExercises(List<RoutineExercise> routineExercises) { this.routineExercises = routineExercises; }
+
+    public Long getVersion() { return version; }
+    public void setVersion(Long version) { this.version = version; }
 }

@@ -32,9 +32,14 @@ build/
 ### VS Code ###
 .vscode/
 
-### Text files ###
-*.txt
+# Project management and prompt tracking files
+progress*.txt
+*Prompt*.txt
 
 ### JSON test files ###
-/*.json
+*.json
+
+# Postman configurations and test data
+.postman/
+postman/
 

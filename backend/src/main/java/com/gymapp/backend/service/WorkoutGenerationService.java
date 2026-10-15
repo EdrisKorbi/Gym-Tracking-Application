@@ -38,7 +38,7 @@ public class WorkoutGenerationService {
         // 1. THE PERFORMANCE WIN: Get a lightweight proxy reference. NO DATABASE QUERY RUNS HERE!
         User userProxy = userRepository.getReferenceById(userId);
 
-        // 2. Fetch the Blueprint
+        // 2. Fetch the Blueprint (PERFORMANCE WIN: 1 Query prevents N+1 storm during generation)
         Program program = programRepository.findById(programId)
                 .orElseThrow(() -> new ResourceNotFoundException("Program not found with ID: " + programId));
 

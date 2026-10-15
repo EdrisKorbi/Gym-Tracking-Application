@@ -4,6 +4,8 @@ import com.gymapp.backend.dto.*;
 import com.gymapp.backend.entity.*;
 import com.gymapp.backend.repository.ProgramRepository;
 import com.gymapp.backend.repository.UserRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.gymapp.backend.exception.ResourceNotFoundException;
@@ -28,7 +30,6 @@ public class ProgramService {
 
     @Transactional
     public ProgramResponseDTO createProgram(UUID userId, ProgramRequestDTO requestDTO) {
-        // PERFORMANCE WIN: Proxy reference instead of SELECT query
         User userProxy = userRepository.getReferenceById(userId);
 
         Program program = new Program();
@@ -70,6 +71,7 @@ public class ProgramService {
 
     @Transactional
     public ProgramResponseDTO updateProgram(UUID userId, UUID programId, ProgramRequestDTO requestDTO) {
+        // PERFORMANCE WIN: Uses EntityGraph to fetch 4 tables at once before O(1) merge
         Program program = programRepository.findById(programId)
                 .orElseThrow(() -> new ResourceNotFoundException("Program not found"));
 
@@ -157,15 +159,17 @@ public class ProgramService {
         programRepository.delete(program);
     }
 
+    // NEW: Returns a Spring Data Page instead of a heavy List
     @Transactional(readOnly = true)
-    public List<ProgramResponseDTO> getAllPrograms(UUID userId) {
-        // Direct query by UUID, completely skipping the user table lookup!
-        List<Program> programs = programRepository.findByUserId(userId);
-        return programs.stream().map(this::mapToResponseDTO).toList();
+    public Page<ProgramResponseDTO> getAllPrograms(UUID userId, Pageable pageable) {
+        Page<Program> programs = programRepository.findByUserId(userId, pageable);
+        // map() on a Page applies the DTO conversion cleanly without losing pagination metadata
+        return programs.map(this::mapToResponseDTO);
     }
 
     @Transactional(readOnly = true)
     public ProgramResponseDTO getProgramById(UUID userId, UUID programId) {
+        // PERFORMANCE WIN: Fetches the entire template tree so the mapToResponseDTO loop does not trigger N+1 queries
         Program program = programRepository.findById(programId)
                 .orElseThrow(() -> new ResourceNotFoundException("Program not found"));
 
@@ -178,6 +182,7 @@ public class ProgramService {
 
     @Transactional
     public ProgramResponseDTO cloneProgram(UUID templateId, UUID currentUserId) {
+        // PERFORMANCE WIN: 1 Query prevents hundreds of SELECTs when copying the massive tree structure
         Program template = programRepository.findById(templateId)
                 .orElseThrow(() -> new ResourceNotFoundException("Program not found"));
 
@@ -201,7 +206,7 @@ public class ProgramService {
 
             for (Routine templateRoutine : templatePhase.getRoutines()) {
                 Routine clonedRoutine = new Routine();
-                clonedRoutine.setPhase(clonedPhase); // Fixed: Matches your Routine entity exactly
+                clonedRoutine.setPhase(clonedPhase);
                 clonedRoutine.setName(templateRoutine.getName());
                 clonedRoutine.setDayNumber(templateRoutine.getDayNumber());
 
@@ -224,10 +229,11 @@ public class ProgramService {
         return mapToResponseDTO(savedClone);
     }
 
+    // NEW: Also updated to support Pagination
     @Transactional(readOnly = true)
-    public List<ProgramResponseDTO> getAllTemplates() {
-        List<Program> templates = programRepository.findByIsTemplateTrue();
-        return templates.stream().map(this::mapToResponseDTO).toList();
+    public Page<ProgramResponseDTO> getAllTemplates(Pageable pageable) {
+        Page<Program> templates = programRepository.findByIsTemplateTrue(pageable);
+        return templates.map(this::mapToResponseDTO);
     }
 
     private ProgramResponseDTO mapToResponseDTO(Program program) {

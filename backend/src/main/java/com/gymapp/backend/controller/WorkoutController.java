@@ -6,6 +6,8 @@ import com.gymapp.backend.dto.WorkoutRequestDTO;
 import com.gymapp.backend.dto.WorkoutResponseDTO;
 import com.gymapp.backend.service.WorkoutService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -36,10 +38,11 @@ public class WorkoutController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<WorkoutResponseDTO>>> getAllWorkouts(
-            @AuthenticationPrincipal CustomUserDetails currentUser) {
+    public ResponseEntity<ApiResponse<Page<WorkoutResponseDTO>>> getAllWorkouts(
+            @AuthenticationPrincipal CustomUserDetails currentUser,
+            Pageable pageable) {
 
-        List<WorkoutResponseDTO> workouts = workoutService.getAllWorkouts(currentUser.getId());
+        Page<WorkoutResponseDTO> workouts = workoutService.getAllWorkouts(currentUser.getId(), pageable);
         return ResponseEntity.ok(
                 ApiResponse.success("Workouts retrieved successfully", workouts)
         );

@@ -6,6 +6,7 @@ import com.gymapp.backend.dto.AuthResponseDTO;
 import com.gymapp.backend.dto.UserLoginDTO;
 import com.gymapp.backend.dto.UserRegistrationDTO;
 import com.gymapp.backend.dto.UserResponseDTO;
+import com.gymapp.backend.service.AuthService;
 import com.gymapp.backend.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -18,14 +19,16 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
     private final UserService userService;
+    private final AuthService authService;
 
-    public UserController(UserService userService) {
+    public UserController(UserService userService, AuthService authService) {
         this.userService = userService;
+        this.authService = authService;
     }
 
     @PostMapping("/register")
     public ResponseEntity<ApiResponse<UserResponseDTO>> registerUser(@Valid @RequestBody UserRegistrationDTO registrationDTO) {
-        UserResponseDTO responseDTO = userService.registerUser(registrationDTO);
+        UserResponseDTO responseDTO = authService.registerUser(registrationDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 ApiResponse.success("User registered successfully", responseDTO)
         );
@@ -33,7 +36,7 @@ public class UserController {
 
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<AuthResponseDTO>> loginUser(@Valid @RequestBody UserLoginDTO loginDTO) {
-        AuthResponseDTO token = userService.loginUser(loginDTO);
+        AuthResponseDTO token = authService.loginUser(loginDTO);
         return ResponseEntity.ok(
                 ApiResponse.success("Login successful", token)
         );

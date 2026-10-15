@@ -8,6 +8,8 @@ import com.gymapp.backend.exception.AccessDeniedException;
 import com.gymapp.backend.exception.ResourceNotFoundException;
 import com.gymapp.backend.repository.UserRepository;
 import com.gymapp.backend.repository.WorkoutRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,7 +31,6 @@ public class WorkoutService {
 
     @Transactional
     public WorkoutResponseDTO logWorkout(UUID userId, WorkoutRequestDTO requestDTO) {
-        // PERFORMANCE WIN: Proxy reference instead of SELECT query
         User userProxy = userRepository.getReferenceById(userId);
 
         Workout workout = new Workout();
@@ -56,16 +57,16 @@ public class WorkoutService {
         return mapToResponseDTO(savedWorkout);
     }
 
+    // NEW: Now returns Page instead of List
     @Transactional(readOnly = true)
-    public List<WorkoutResponseDTO> getAllWorkouts(UUID userId) {
-        // Direct query by UUID, completely skipping the user table lookup!
-        List<Workout> workouts = workoutRepository.findByUserId(userId);
-        return workouts.stream().map(this::mapToResponseDTO).toList();
+    public Page<WorkoutResponseDTO> getAllWorkouts(UUID userId, Pageable pageable) {
+        Page<Workout> workouts = workoutRepository.findByUserId(userId, pageable);
+        return workouts.map(this::mapToResponseDTO);
     }
 
     @Transactional(readOnly = true)
     public WorkoutResponseDTO getWorkoutById(UUID userId, UUID workoutId) {
-        Workout workout = workoutRepository.findById(workoutId)
+        Workout workout = workoutRepository.findByIdWithExercises(workoutId)
                 .orElseThrow(() -> new ResourceNotFoundException("Workout not found"));
 
         if (!workout.getUser().getId().equals(userId)) {
@@ -77,7 +78,8 @@ public class WorkoutService {
 
     @Transactional
     public WorkoutResponseDTO updateWorkout(UUID userId, UUID workoutId, WorkoutRequestDTO requestDTO) {
-        Workout workout = workoutRepository.findById(workoutId)
+        // PERFORMANCE WIN: Fetches Workout and Exercises in 1 query before diff/merge
+        Workout workout = workoutRepository.findByIdWithExercises(workoutId)
                 .orElseThrow(() -> new ResourceNotFoundException("Workout not found"));
 
         if (!workout.getUser().getId().equals(userId)) {

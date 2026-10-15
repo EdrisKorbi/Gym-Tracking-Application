@@ -30,6 +30,9 @@ public class Exercise {
     @Column(name = "exercise_order")
     private Integer exerciseOrder = 0; // Guarantees explicit list sequencing
 
+    @Version
+    private Long version;
+
     // Getters and Setters
     public UUID getId() { return id; }
     public void setId(UUID id) { this.id = id; }
@@ -51,4 +54,7 @@ public class Exercise {
 
     public Integer getExerciseOrder() { return exerciseOrder; }
     public void setExerciseOrder(Integer exerciseOrder) { this.exerciseOrder = exerciseOrder; }
+
+    public Long getVersion() { return version; }
+    public void setVersion(Long version) { this.version = version; }
 }

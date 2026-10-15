@@ -1,0 +1,27 @@
+$kind: http-request
+url: "{{base_url}}/api/v1/programs/templates?page=0&size=10"
+method: GET
+queryParams:
+  page: "0"
+  size: "10"
+scripts:
+  - type: afterResponse
+    code: "pm.test(\"Status code is 200\", function () {\r
+
+      \    pm.response.to.have.status(200);\r
+
+      });\r
+
+      \r
+
+      // Extract the first template's ID using the new 'content' wrapper\r
+
+      let jsonData = pm.response.json();\r
+
+      if (jsonData.data.content && jsonData.data.content.length > 0) {\r
+
+      \    pm.environment.set(\"templateId\", jsonData.data.content[0].id);\r
+
+      }"
+    language: text/javascript
+order: 6524

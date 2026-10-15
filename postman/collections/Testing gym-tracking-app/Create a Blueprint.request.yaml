@@ -1,0 +1,78 @@
+$kind: http-request
+description: ""
+url: "{{base_url}}/api/v1/programs"
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \  \"name\": \"E2E Test Program\",\r
+
+    \  \"description\": \"Testing the Proxy Architecture\",\r
+
+    \  \"isTemplate\": true,\r
+
+    \  \"phases\": [\r
+
+    \    {\r
+
+    \      \"name\": \"Phase 1: Hypertrophy\",\r
+
+    \      \"phaseOrder\": 1,\r
+
+    \      \"routines\": [\r
+
+    \        {\r
+
+    \          \"name\": \"Push Day\",\r
+
+    \          \"dayNumber\": 1,\r
+
+    \          \"routineExercises\": [\r
+
+    \            {\r
+
+    \              \"name\": \"Bench Press\",\r
+
+    \              \"targetSets\": 4,\r
+
+    \              \"targetReps\": 10,\r
+
+    \              \"exerciseOrder\": 1\r
+
+    \            }\r
+
+    \          ]\r
+
+    \        }\r
+
+    \      ]\r
+
+    \    }\r
+
+    \  ]\r
+
+    }"
+auth:
+  type: inherit
+  credentials:
+    id: 0d82e42f-a3e7-484d-b31d-248092b6a7db
+scripts:
+  - type: afterResponse
+    code: "// 1. Assert the blueprint was created successfully\r
+
+      pm.test(\"Program created successfully\", function () {\r
+
+      \    pm.response.to.have.status(201);\r
+
+      });\r
+
+      \r
+
+      // 2. Extract the ID and save it to the environment\r
+
+      let jsonData = pm.response.json();\r
+
+      pm.environment.set(\"program_id\", jsonData.data.id); // New way"
+    language: text/javascript
+order: 3000

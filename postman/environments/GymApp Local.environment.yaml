@@ -1,0 +1,12 @@
+name: GymApp Local
+values:
+  - key: base_url
+    value: ''
+  - key: auth_token
+    value: ''
+  - key: todayDate
+    value: ''
+  - key: workoutId
+    value: ''
+  - key: templateId
+    value: ''

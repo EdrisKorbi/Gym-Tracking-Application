@@ -1,0 +1,56 @@
+**CRITICAL DIRECTIVE:** 
+THE POSTGRESQL DATABASE SCHEMA IS 100% LOCKED, DEPLOYED, AND FINAL. YOU ARE STRICTLY FORBIDDEN FROM SUGGESTING, INFERRING, OR MAKING ANY CHANGES TO THE DATABASE TABLES, COLUMNS, OR RELATIONSHIPS. ALL JPA ENTITIES MUST BE MAPPED EXACTLY TO THE EXISTING STRUCTURE.
+
+### PHASE 1: Architecture & Scalable DB Design ###
+Status: COMPLETED
+
+Architecture Decisions Lock-in:
+- Workout Structure: Flexible Block System (Programs -> Phases -> Routines -> Workouts -> Exercises).
+- Primary Keys: Universal UUID implementation for security and enterprise scale.
+- Database Schema: Strict separation of Blueprints (Routines) from Execution Logs (Workouts) with `ON DELETE SET NULL` bridge relationships, supporting ad-hoc custom workouts linked to phases.
+- Edge Cases Handled: Added `status` to workouts (PLANNED, IN_PROGRESS, COMPLETED, SKIPPED) for calendar tracking, and `exercise_order` to exercises and blueprints for explicit list sequencing.
+- Core Stack: PostgreSQL, Spring Boot (Java), Angular (TypeScript), Docker.
+
+### PHASE 2: Optimized Backend CRUD & DTOs ###
+Status: COMPLETED
+
+Phase 2 Features Implemented:
+- Identity & Security: JWT-based authentication and secure user verification endpoints (`/api/v1/auth/me`).
+- Core Logging: Workout and Exercise relational mapping (One-to-Many) tested and operational against the updated UUID schema.
+- REST API Endpoints: Full CRUD cycle fully operational via PowerShell/JSON testing.
+- Advanced Logic: Integrated production-grade Diff/Merge logic for in-place updates, utilizing idiomatic Java Streams and O(1) Map lookups.
+
+### PHASE 3: Macrocycles & Programming (Programs, Phases, Routines) ###
+Status: COMPLETED
+
+Phase 3 Features Implemented:
+- Entity Architecture: Mapped `programs`, `program_phases`, `routines`, and `routine_exercises` into Spring Boot JPA Entities.
+- Execution Bridge: Updated `Workout` and `Exercise` entities to bridge Blueprints and Execution logs via `phaseId`, `routineId`, `status`, and `exerciseOrder`.
+- Cascade & Deletion: Implemented bidirectional `@OneToMany` with `CascadeType.ALL` and verified `ON DELETE SET NULL` to protect historical user logs.
+- REST API Endpoints: Full CRUD (POST, GET, PUT, DELETE) implemented for Program blueprints.
+- Advanced Logic: Engineered a 4-level nested O(1) Map Diff/Merge algorithm using standard `for` loops for safe Hibernate entity state mutation.
+
+### PHASE 4: The Workout Generation Engine & Program Cloning ###
+Status: COMPLETED
+
+Phase 4 Features Implemented:
+- Blueprint Instantiation: Built the generation engine to translate abstract `Routines` into concrete, calendar-mapped `PLANNED` Workouts based on user scheduling preferences (e.g., Mon/Wed/Fri).
+- Master/Clone Architecture: Implemented a Deep Copy service that clones master templates (`isTemplate = true`), strips original UUIDs, and generates a fresh, isolated child hierarchy for individual user customization.
+
+### PHASE 5: API Standardization & Automated QA ###
+Status: COMPLETED
+
+Phase 5 Features Implemented:
+- Envelope Pattern: Standardized all REST controllers using a generic `ApiResponse<T>` wrapper class to guarantee identical response structures (timestamp, success, message, data) for frontend stability.
+- CI/CD Test Pipeline: Engineered an automated Postman test suite utilizing environment variables and request chaining (extracting tokens and UUIDs directly from responses).
+- Idempotency: Added automated teardown scripts (DELETE requests) at the end of the collection runner to ensure the database remains perfectly clean after testing.
+
+### PHASE 6: Backend Production Readiness & Schema Safety ###
+Status: NEXT
+
+Current Objective:
+- Schema Safety: Integrate Flyway Database Migrations to strictly version control PostgreSQL state.
+- Data Integrity: Add `@Version` for Optimistic Locking to prevent conflicting offline/online data overwrites.
+- Database Scale: Resolve N+1 query bottlenecks via `@EntityGraph` and implement Pageable lists to prevent memory exhaustion.
+- Production Tooling: Integrate Spring Boot Actuator for health monitoring and Testcontainers for automated integration testing.
+- Advanced QA: Finalize testing with JSON Schema Validation and Data-Driven CSV injections before transitioning to the Angular frontend.

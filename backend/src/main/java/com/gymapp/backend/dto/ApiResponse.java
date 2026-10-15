@@ -32,6 +32,16 @@ public class ApiResponse<T> {
         return new ApiResponse<>(true, message, null);
     }
 
+    // 4. Error with Message only
+    public static <T> ApiResponse<T> error(String message) {
+        return new ApiResponse<>(false, message, null);
+    }
+
+    // 5. Error with Message and Data (Useful for returning a list of validation field errors)
+    public static <T> ApiResponse<T> error(String message, T data) {
+        return new ApiResponse<>(false, message, data);
+    }
+
     // Getters
     public LocalDateTime getTimestamp() { return timestamp; }
     public boolean isSuccess() { return success; }

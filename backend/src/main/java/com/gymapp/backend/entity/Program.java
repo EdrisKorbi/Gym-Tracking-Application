@@ -29,6 +29,9 @@ public class Program {
     @OneToMany(mappedBy = "program", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProgramPhase> phases = new ArrayList<>();
 
+    @Version
+    private Long version;
+
     // Getters and Setters
     public UUID getId() { return id; }
     public void setId(UUID id) { this.id = id; }
@@ -47,4 +50,7 @@ public class Program {
 
     public List<ProgramPhase> getPhases() { return phases; }
     public void setPhases(List<ProgramPhase> phases) { this.phases = phases; }
+
+    public Long getVersion() { return version; }
+    public void setVersion(Long version) { this.version = version; }
 }

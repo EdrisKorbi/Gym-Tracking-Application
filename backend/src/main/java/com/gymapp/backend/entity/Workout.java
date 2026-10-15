@@ -38,6 +38,9 @@ public class Workout {
     @OneToMany(mappedBy = "workout", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Exercise> exercises = new ArrayList<>();
 
+    @Version
+    private Long version;
+
     // Getters and Setters
     public UUID getId() { return id; }
     public void setId(UUID id) { this.id = id; }
@@ -62,4 +65,7 @@ public class Workout {
 
     public List<Exercise> getExercises() { return exercises; }
     public void setExercises(List<Exercise> exercises) { this.exercises = exercises; }
+
+    public Long getVersion() { return version; }
+    public void setVersion(Long version) { this.version = version; }
 }

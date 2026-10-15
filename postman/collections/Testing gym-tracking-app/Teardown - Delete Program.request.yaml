@@ -1,0 +1,22 @@
+$kind: http-request
+url: "{{base_url}}/api/v1/programs/{{program_id}}"
+method: DELETE
+scripts:
+  - type: afterResponse
+    code: "// 1. Verify the deletion was successful (Spring Boot usually returns 200
+      OK or 204 No Content for deletes)\r
+
+      pm.test(\"Cleanup successful\", function () {\r
+
+      \    pm.expect(pm.response.code).to.be.oneOf([200, 204]);\r
+
+      });\r
+
+      \r
+
+      // 2. Clear the variable from the environment so it's fresh for the next
+      run\r
+
+      pm.environment.unset(\"program_id\");"
+    language: text/javascript
+order: 6954

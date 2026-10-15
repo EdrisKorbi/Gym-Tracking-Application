@@ -1,0 +1,33 @@
+$kind: http-request
+url: "{{base_url}}/api/v1/users/login"
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \    \"email\": \"janedoe@example.com\",\r
+
+    \    \"password\": \"password123\"\r
+
+    }"
+auth:
+  type: bearer
+scripts:
+  - type: afterResponse
+    code: "// 1. Assert the request was successful\r
+
+      pm.test(\"Successful login returns 200\", function () {\r
+
+      \    pm.response.to.have.status(200);\r
+
+      });\r
+
+      \r
+
+      // 2. Extract the token and save it to the environment automatically\r
+
+      let jsonData = pm.response.json();\r
+
+      pm.environment.set(\"auth_token\", jsonData.data.token);"
+    language: text/javascript
+order: 1000

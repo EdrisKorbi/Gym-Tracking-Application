@@ -26,6 +26,9 @@ public class ProgramPhase {
     @OneToMany(mappedBy = "phase", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Routine> routines = new ArrayList<>();
 
+    @Version
+    private Long version;
+
     // Getters and Setters
     public UUID getId() { return id; }
     public void setId(UUID id) { this.id = id; }
@@ -42,4 +45,7 @@ public class ProgramPhase {
     // These are the missing methods your IDE is complaining about
     public List<Routine> getRoutines() { return routines; }
     public void setRoutines(List<Routine> routines) { this.routines = routines; }
+
+    public Long getVersion() { return version; }
+    public void setVersion(Long version) { this.version = version; }
 }

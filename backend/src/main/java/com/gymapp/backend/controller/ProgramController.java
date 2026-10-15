@@ -13,6 +13,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.UUID;
@@ -51,10 +53,11 @@ public class ProgramController {
     // ==========================================
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<ProgramResponseDTO>>> getAllPrograms(
-            @AuthenticationPrincipal CustomUserDetails currentUser) {
+    public ResponseEntity<ApiResponse<Page<ProgramResponseDTO>>> getAllPrograms(
+            @AuthenticationPrincipal CustomUserDetails currentUser,
+            Pageable pageable) {
 
-        List<ProgramResponseDTO> programs = programService.getAllPrograms(currentUser.getId());
+        Page<ProgramResponseDTO> programs = programService.getAllPrograms(currentUser.getId(), pageable);
         return ResponseEntity.ok(
                 ApiResponse.success("Programs retrieved successfully", programs)
         );
@@ -107,8 +110,8 @@ public class ProgramController {
 
     // 1. Browse Master Templates (Available to all authenticated users)
     @GetMapping("/templates")
-    public ResponseEntity<ApiResponse<List<ProgramResponseDTO>>> getAllTemplates() {
-        List<ProgramResponseDTO> templates = programService.getAllTemplates();
+    public ResponseEntity<ApiResponse<Page<ProgramResponseDTO>>> getAllTemplates(Pageable pageable) {
+        Page<ProgramResponseDTO> templates = programService.getAllTemplates(pageable);
         return ResponseEntity.ok(
                 ApiResponse.success("Templates retrieved successfully", templates)
         );
