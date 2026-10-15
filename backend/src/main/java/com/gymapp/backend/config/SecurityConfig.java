@@ -30,7 +30,7 @@ public class SecurityConfig {
                 // Tell Spring we are stateless (we rely on tokens, not server sessions)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/v1/users/register", "/api/v1/users/login").permitAll()
+                        .requestMatchers("/api/v1/users/register", "/api/v1/users/login", "/actuator/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 // Insert our custom JWT filter BEFORE the standard Spring username/password filter
