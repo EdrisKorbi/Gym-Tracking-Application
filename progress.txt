@@ -1,5 +1,5 @@
 **CRITICAL DIRECTIVE:** 
-THE POSTGRESQL DATABASE SCHEMA IS 100% LOCKED, DEPLOYED, AND FINAL. YOU ARE STRICTLY FORBIDDEN FROM SUGGESTING, INFERRING, OR MAKING ANY CHANGES TO THE DATABASE TABLES, COLUMNS, OR RELATIONSHIPS. ALL JPA ENTITIES MUST BE MAPPED EXACTLY TO THE EXISTING STRUCTURE.
+THE POSTGRESQL DATABASE SCHEMA IS 100% LOCKED, DEPLOYED, AND FINAL. YOU ARE STRICTLY FORBIDDEN FROM SUGGESTING, INFERRING, OR MAKING ANY CHANGES TO THE DATABASE TABLES, COLUMNS, OR RELATIONSHIPS. ALL JPA ENTITIES MUST BE MAPPED EXACTLY TO THE EXISTING STRUCTURE. (Note: Schema evolutions for scaling/security must strictly go through versioned Flyway SQL migrations).
 
 ### PHASE 1: Architecture & Scalable DB Design ###
 Status: COMPLETED
@@ -46,11 +46,23 @@ Phase 5 Features Implemented:
 - Idempotency: Added automated teardown scripts (DELETE requests) at the end of the collection runner to ensure the database remains perfectly clean after testing.
 
 ### PHASE 6: Backend Production Readiness & Schema Safety ###
+Status: COMPLETED
+
+Phase 6 Features Implemented:
+- Schema Safety: Integrated Flyway Database Migrations (`V1__Init_Schema.sql`, `V2__Add_Optimistic_Locking.sql`) to strictly version control PostgreSQL state and locked Hibernate to `ddl-auto=validate`.
+- Data Integrity: Added `@Version` for Optimistic Locking across entities and mapped `ObjectOptimisticLockingFailureException` to `409 CONFLICT` in `GlobalExceptionHandler`.
+- Database Scale & N+1 Elimination: Implemented `@EntityGraph(attributePaths = {"exercises"})` on `WorkoutRepository` for single-list joins, and configured Global Batch Fetching (`default_batch_fetch_size=100`) for 4-level deep `Program` hierarchies to eliminate N+1 queries while preventing Hibernate `MultipleBagFetchException` Cartesian Product explosions.
+- Memory Protection (Pagination): Upgraded all list endpoints (`getAllPrograms`, `getAllTemplates`, `getAllWorkouts`) from `List<T>` to Spring Data `Page<T>` and `Pageable`, and updated Postman scripts to parse the `data.content` wrapper and dynamic dates.
+- Auth Architecture (SRP): Refactored authentication into a dedicated `AuthService` (`registerUser`, `loginUser`) separated from `UserService`, and created `InvalidCredentialsException` returning `401 UNAUTHORIZED`.
+- Production Tooling: Integrated Spring Boot Actuator (`/actuator/health`) with DB health indicators and configured Testcontainers (`AbstractIntegrationTest` with `postgres:15-alpine`) verified via `BackendApplicationTests`.
+
+### PHASE 7: Enterprise IAM, User Self-Service CRUD & Automated Integration Testing ###
 Status: NEXT
 
 Current Objective:
-- Schema Safety: Integrate Flyway Database Migrations to strictly version control PostgreSQL state.
-- Data Integrity: Add `@Version` for Optimistic Locking to prevent conflicting offline/online data overwrites.
-- Database Scale: Resolve N+1 query bottlenecks via `@EntityGraph` and implement Pageable lists to prevent memory exhaustion.
-- Production Tooling: Integrate Spring Boot Actuator for health monitoring and Testcontainers for automated integration testing.
-- Advanced QA: Finalize testing with JSON Schema Validation and Data-Driven CSV injections before transitioning to the Angular frontend.
+- Schema Evolution (Flyway V3): Add `is_active` and `role` (`USER`, `ADMIN`) columns to `users` via `V3__Add_User_Roles_And_Soft_Delete.sql`.
+- The "Self-Service" Pattern (`/me` Endpoints): Implement `GET /api/v1/users/me`, `PUT /api/v1/users/me`, and `DELETE /api/v1/users/me` strictly bound to the JWT principal to prevent IDOR/privilege escalation.
+- Segregate Sensitive Updates: Separate profile updates (`firstName`, `lastName`) from sensitive credential operations (`PUT /api/v1/users/me/password`).
+- Soft Delete Architecture: Deactivate user accounts (`isActive = false`) from the user's perspective while preserving historical workout integrity, blocking inactive accounts at the security/login layer.
+- Admin-Only Back-Office Endpoints: Implement `@PreAuthorize("hasRole('ADMIN')")` routes (`/api/v1/admin/users/**`) with pagination for user management and Master Template administration.
+- Automated Integration Testing (Testcontainers) & QA: Write comprehensive JUnit 5 integration tests extending `AbstractIntegrationTest` for IAM security, soft deletes, and the Master/Clone template + Workout Generation workflows, alongside Postman JSON Schema & CSV testing.

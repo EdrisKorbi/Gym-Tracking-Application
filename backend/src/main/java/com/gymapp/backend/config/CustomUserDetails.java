@@ -1,6 +1,8 @@
 package com.gymapp.backend.config;
 
+import com.gymapp.backend.enums.Role;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
@@ -11,37 +13,39 @@ public class CustomUserDetails implements UserDetails {
 
     private final UUID id;
     private final String email;
+    private final Role role; // NEW
+    private final boolean isActive; // NEW
 
-    // Constructor to build the card
-    public CustomUserDetails(UUID id, String email) {
+    // Constructor updated to receive role and active status
+    public CustomUserDetails(UUID id, String email, Role role, boolean isActive) {
         this.id = id;
         this.email = email;
+        this.role = role;
+        this.isActive = isActive;
     }
 
-    // Our custom getter so controllers can extract the exact database ID
     public UUID getId() {
         return id;
     }
 
-    // --- Spring Security Required Methods Below ---
+    public Role getRole() {
+        return role;
+    }
 
     @Override
     public String getUsername() {
-        // Spring calls it "username", but in our app, the email is the username.
         return email;
     }
 
     @Override
     public String getPassword() {
-        // We return null here. Why? Because by the time this object is created,
-        // the JWT has already proven they are logged in. We don't need their password anymore.
         return null;
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        // We will return an empty list for now until we add Roles (ADMIN, USER) later.
-        return Collections.emptyList();
+        // Spring Security requires the "ROLE_" prefix to work with hasRole()
+        return Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role.name()));
     }
 
     @Override
@@ -61,6 +65,7 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true;
+        // Maps the soft-delete flag strictly to Spring Security's enabled status
+        return isActive;
     }
 }

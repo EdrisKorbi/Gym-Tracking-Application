@@ -1,11 +1,7 @@
 package com.gymapp.backend.controller;
 
 import com.gymapp.backend.config.CustomUserDetails;
-import com.gymapp.backend.dto.ApiResponse;
-import com.gymapp.backend.dto.AuthResponseDTO;
-import com.gymapp.backend.dto.UserLoginDTO;
-import com.gymapp.backend.dto.UserRegistrationDTO;
-import com.gymapp.backend.dto.UserResponseDTO;
+import com.gymapp.backend.dto.*;
 import com.gymapp.backend.service.AuthService;
 import com.gymapp.backend.service.UserService;
 import jakarta.validation.Valid;
@@ -49,6 +45,37 @@ public class UserController {
         UserResponseDTO profile = userService.getUserProfile(currentUser.getId());
         return ResponseEntity.ok(
                 ApiResponse.success("Profile retrieved successfully", profile)
+        );
+    }
+
+    @PutMapping("/me")
+    public ResponseEntity<ApiResponse<UserResponseDTO>> updateUserProfile(
+            @AuthenticationPrincipal CustomUserDetails currentUser,
+            @Valid @RequestBody UserUpdateDTO updateDTO) {
+
+        UserResponseDTO updatedProfile = userService.updateUserProfile(currentUser.getId(), updateDTO);
+        return ResponseEntity.ok(
+                ApiResponse.success("Profile updated successfully", updatedProfile)
+        );
+    }
+
+    @PutMapping("/me/password")
+    public ResponseEntity<ApiResponse<Void>> updatePassword(
+            @AuthenticationPrincipal CustomUserDetails currentUser,
+            @Valid @RequestBody PasswordUpdateDTO passwordDTO) {
+
+        userService.updatePassword(currentUser.getId(), passwordDTO.getCurrentPassword(), passwordDTO.getNewPassword());
+
+        return ResponseEntity.ok(ApiResponse.success("Password updated successfully", null));
+    }
+
+    @DeleteMapping("/me")
+    public ResponseEntity<ApiResponse<Void>> deactivateUser(
+            @AuthenticationPrincipal CustomUserDetails currentUser) {
+
+        userService.deactivateUser(currentUser.getId());
+        return ResponseEntity.ok(
+                ApiResponse.success("Account deactivated successfully")
         );
     }
 }

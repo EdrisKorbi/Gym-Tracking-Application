@@ -1,5 +1,6 @@
 package com.gymapp.backend.config;
 
+import com.gymapp.backend.enums.Role;
 import com.gymapp.backend.service.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -27,31 +28,28 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
-        // 1. Check if the request has an Authorization header with a Bearer token
         final String authHeader = request.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        // 2. Extract the token
         final String jwt = authHeader.substring(7);
 
-        // 3. Validate the token
         if (jwtService.isTokenValid(jwt)) {
             String email = jwtService.extractEmail(jwt);
-            String userIdString = jwtService.extractUserId(jwt); // NEW: Extract the UUID
+            String userIdString = jwtService.extractUserId(jwt);
+            String roleString = jwtService.extractRole(jwt); // NEW
+            Boolean isActive = jwtService.extractIsActive(jwt); // NEW
 
-            // 4. Create our Custom Profile Card if not already authenticated
-            if (email != null && userIdString != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            if (email != null && userIdString != null && roleString != null && isActive != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
-                // Convert the String from the JWT back into a real Java UUID
                 UUID userId = UUID.fromString(userIdString);
+                Role role = Role.valueOf(roleString); // NEW: Convert String back to Enum
 
-                // Create our custom profile
-                CustomUserDetails userDetails = new CustomUserDetails(userId, email);
+                // NEW: Pass all 4 arguments to our updated constructor
+                CustomUserDetails userDetails = new CustomUserDetails(userId, email, role, isActive);
 
-                // Pass the ENTIRE userDetails object into Spring Security, not just the email
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                         userDetails, null, userDetails.getAuthorities());
 
@@ -60,7 +58,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
         }
 
-        // 5. Continue processing the request
         filterChain.doFilter(request, response);
     }
 }
