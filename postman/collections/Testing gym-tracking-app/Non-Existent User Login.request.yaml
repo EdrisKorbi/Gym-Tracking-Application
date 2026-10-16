@@ -25,13 +25,15 @@ scripts:
 
       \r
 
-      pm.test(\"Response uses the standard GlobalExceptionHandler error envelope\", function () {\r
+      pm.test(\"Response uses the standard GlobalExceptionHandler error
+      envelope\", function () {\r
 
       \    let jsonData = pm.response.json();\r
 
       \    \r
 
-      \    // Verifies the ApiResponse structure from your custom exception handler\r
+      \    // Verifies the ApiResponse structure from your custom exception
+      handler\r
 
       \    pm.expect(jsonData.success).to.be.false;\r
 
@@ -41,4 +43,4 @@ scripts:
 
       });"
     language: text/javascript
-order: 8000
+order: 6978

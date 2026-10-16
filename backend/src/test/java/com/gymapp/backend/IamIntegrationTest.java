@@ -10,6 +10,7 @@ import com.gymapp.backend.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import com.gymapp.backend.exception.AccessDeniedException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -47,12 +48,13 @@ class IamIntegrationTest extends AbstractIntegrationTest {
         loginDTO.setPassword("SecurePass123!");
 
         // 5. Assert that the correct exception is thrown to block the login
-        InvalidCredentialsException exception = assertThrows(
-                InvalidCredentialsException.class,
+        AccessDeniedException exception = assertThrows(
+                AccessDeniedException.class,
                 () -> authService.loginUser(loginDTO)
         );
 
         // 6. Verify the exact security message
-        assertEquals("This account has been deactivated.", exception.getMessage());
+        assertEquals("Account is deactivated or banned", exception.getMessage()); // EXACT EDIT HERE
+
     }
 }

@@ -3,7 +3,9 @@ package com.gymapp.backend.controller;
 import com.gymapp.backend.config.CustomUserDetails;
 import com.gymapp.backend.dto.*;
 import com.gymapp.backend.service.AuthService;
+import com.gymapp.backend.service.RateLimitingService;
 import com.gymapp.backend.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,26 +18,43 @@ public class UserController {
 
     private final UserService userService;
     private final AuthService authService;
+    private final RateLimitingService rateLimitingService; // NEW
 
-    public UserController(UserService userService, AuthService authService) {
+    public UserController(UserService userService, AuthService authService, RateLimitingService rateLimitingService) {
         this.userService = userService;
         this.authService = authService;
+        this.rateLimitingService = rateLimitingService;
+
     }
 
     @PostMapping("/register")
-    public ResponseEntity<ApiResponse<UserResponseDTO>> registerUser(@Valid @RequestBody UserRegistrationDTO registrationDTO) {
+    public ResponseEntity<ApiResponse<UserResponseDTO>> registerUser(
+            @Valid @RequestBody UserRegistrationDTO registrationDTO,
+            HttpServletRequest request) {
+
+        if (!rateLimitingService.resolveBucket(request.getRemoteAddr()).tryConsume(1)) {
+            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                    .body(ApiResponse.error("Too many requests. Please try again in 1 minute."));
+        }
+
         UserResponseDTO responseDTO = authService.registerUser(registrationDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).body(
-                ApiResponse.success("User registered successfully", responseDTO)
-        );
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.success("User registered successfully", responseDTO));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse<AuthResponseDTO>> loginUser(@Valid @RequestBody UserLoginDTO loginDTO) {
-        AuthResponseDTO token = authService.loginUser(loginDTO);
-        return ResponseEntity.ok(
-                ApiResponse.success("Login successful", token)
-        );
+    public ResponseEntity<ApiResponse<AuthResponseDTO>> login(
+            @Valid @RequestBody UserLoginDTO loginDTO,
+            HttpServletRequest request) {
+
+        if (!rateLimitingService.resolveBucket(request.getRemoteAddr()).tryConsume(1)) {
+            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                    .body(ApiResponse.error("Too many login attempts. Please try again in 1 minute."));
+        }
+
+        // 3. CORRECTED: Route the login logic specifically to the AuthService
+        AuthResponseDTO authResponse = authService.loginUser(loginDTO);
+        return ResponseEntity.ok(ApiResponse.success("Login successful", authResponse));
     }
 
     @GetMapping("/me")
@@ -77,5 +96,13 @@ public class UserController {
         return ResponseEntity.ok(
                 ApiResponse.success("Account deactivated successfully")
         );
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<ApiResponse<AuthResponseDTO>> refreshToken(
+            @Valid @RequestBody TokenRefreshRequestDTO requestDTO) {
+
+        AuthResponseDTO response = authService.refreshToken(requestDTO);
+        return ResponseEntity.ok(ApiResponse.success("Token refreshed successfully", response));
     }
 }

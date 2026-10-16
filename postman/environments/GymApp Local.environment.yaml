@@ -3,10 +3,12 @@ values:
   - key: base_url
     value: ''
   - key: auth_token
-    value: ''
+    secret: true
   - key: todayDate
     value: ''
   - key: workoutId
     value: ''
   - key: templateId
+    value: ''
+  - key: refreshToken
     value: ''

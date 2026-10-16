@@ -12,6 +12,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 
 import java.util.List;
 import java.util.UUID;
@@ -40,7 +42,7 @@ public class WorkoutController {
     @GetMapping
     public ResponseEntity<ApiResponse<Page<WorkoutResponseDTO>>> getAllWorkouts(
             @AuthenticationPrincipal CustomUserDetails currentUser,
-            Pageable pageable) {
+            @PageableDefault(size = 10, sort = "date", direction = Sort.Direction.DESC) Pageable pageable) { // EXACT EDIT HERE
 
         Page<WorkoutResponseDTO> workouts = workoutService.getAllWorkouts(currentUser.getId(), pageable);
         return ResponseEntity.ok(
