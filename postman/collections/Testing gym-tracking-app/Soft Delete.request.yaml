@@ -1,0 +1,12 @@
+$kind: http-request
+url: "{{base_url}}/api/v1/users/me"
+method: DELETE
+scripts:
+  - type: afterResponse
+    code: "pm.test(\"14. Soft Delete: Deactivates current user\", function () {\r
+
+      \    pm.expect(pm.response.code).to.be.oneOf([200, 204]);\r
+
+      });"
+    language: text/javascript
+order: 9984

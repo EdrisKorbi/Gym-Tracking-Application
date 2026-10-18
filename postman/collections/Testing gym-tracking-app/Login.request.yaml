@@ -5,31 +5,31 @@ body:
   type: json
   content: "{\r
 
-    \    \"email\": \"alex.demo@example.com\",\r
+    \    \"email\": \"{{workflow_email}}\",\r
 
-    \    \"password\": \"SecurePassword123\"\r
+    \    \"password\": \"{{workflow_password}}\"\r
 
     }"
 auth:
   type: bearer
 scripts:
   - type: afterResponse
-    code: "// 1. Assert the request was successful\r
-
-      pm.test(\"Successful login returns 200\", function () {\r
+    code: "pm.test(\"2. Login: Issues JWT and Refresh Token\", function () {\r
 
       \    pm.response.to.have.status(200);\r
 
-      });\r
+      \    let jsonData = pm.response.json();\r
+
+      \    pm.expect(jsonData.data.token).to.be.a(\"string\");\r
+
+      \    pm.expect(jsonData.data.refreshToken).to.be.a(\"string\");\r
 
       \r
 
-      // 2. Extract the token and save it to the environment automatically\r
+      \    pm.environment.set(\"auth_token\", jsonData.data.token);\r
 
-      let jsonData = pm.response.json();\r
+      \    pm.environment.set(\"refreshToken\", jsonData.data.refreshToken);\r
 
-      pm.environment.set(\"auth_token\", jsonData.data.token);\r
-
-      pm.environment.set(\"refreshToken\", jsonData.data.refreshToken);"
+      });"
     language: text/javascript
-order: 1000
+order: 1783

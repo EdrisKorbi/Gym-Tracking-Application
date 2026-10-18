@@ -1,0 +1,22 @@
+type: dataset
+name: Testing gym-tracking-app – login_tests
+id: d722e5ed-e42b-4503-b2a8-572ffe38186e
+data_dir: .resources
+sources:
+  - from: embedded_datasource
+    datasource:
+      name: source_testing_gym_tracking_app_login_tests
+      id: 4eb053b1-22ec-4533-a9d1-35d2618fa4ab
+      dsKey: source_testing_gym_tracking_app_login_tests
+      format: csv
+      source_type: static
+      location:
+        type: local_filesystem
+        value: .resources/testing-gym-tracking-app-login-tests.csv
+views:
+  - from: embedded_view
+    view:
+      name: 'login_tests'
+      id: 'a4b3e494-2649-4354-9365-a9e9beda8ff8'
+      query: |-
+        SELECT * FROM source_testing_gym_tracking_app_login_tests

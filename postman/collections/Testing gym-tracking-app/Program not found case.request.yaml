@@ -6,4 +6,12 @@ auth:
   type: inherit
   credentials:
     id: 0d82e42f-a3e7-484d-b31d-248092b6a7db
-order: 6984
+scripts:
+  - type: afterResponse
+    code: "pm.test(\"11. Deleted Program Lookup: Returns 404 Not Found\", function () {\r
+
+      \    pm.response.to.have.status(404);\r
+
+      });"
+    language: text/javascript
+order: 6955

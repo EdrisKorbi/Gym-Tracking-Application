@@ -1,0 +1,25 @@
+$kind: http-request
+url: "{{base_url}}/api/v1/users/refresh"
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \    \"refreshToken\": \"{{refreshToken}}\"\r
+
+    }"
+scripts:
+  - type: afterResponse
+    code: "pm.test(\"3. Refresh Token: Issues new JWT\", function () {\r
+
+      \    pm.response.to.have.status(200);\r
+
+      \    let jsonData = pm.response.json();\r
+
+      \    pm.expect(jsonData.data.token).to.be.a(\"string\");\r
+
+      \    pm.environment.set(\"auth_token\", jsonData.data.token);\r
+
+      });"
+    language: text/javascript
+order: 1807

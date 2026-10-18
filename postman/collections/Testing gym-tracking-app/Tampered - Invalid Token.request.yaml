@@ -7,10 +7,11 @@ auth:
   type: bearer
 scripts:
   - type: afterResponse
-    code: "pm.test(\"Security blocks invalid token with 403 Forbidden\", function () {\r
+    code: "pm.test(\"Security blocks invalid token with 403 Forbidden\", function ()
+      {\r
 
       \    pm.response.to.have.status(403);\r
 
       });"
     language: text/javascript
-order: 7000
+order: 6965

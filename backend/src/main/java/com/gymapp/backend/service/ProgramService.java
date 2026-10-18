@@ -2,6 +2,7 @@ package com.gymapp.backend.service;
 
 import com.gymapp.backend.dto.*;
 import com.gymapp.backend.entity.*;
+import com.gymapp.backend.enums.Role;
 import com.gymapp.backend.repository.ProgramRepository;
 import com.gymapp.backend.repository.UserRepository;
 import org.springframework.data.domain.Page;
@@ -31,6 +32,13 @@ public class ProgramService {
     @Transactional
     public ProgramResponseDTO createProgram(UUID userId, ProgramRequestDTO requestDTO) {
         User userProxy = userRepository.getReferenceById(userId);
+
+        // Payload-Based Role Security
+        // Prevent standard users from publishing to the global marketplace
+        if (Boolean.TRUE.equals(requestDTO.getIsTemplate()) &&
+                userProxy.getRole() != Role.ADMIN) {
+            throw new AccessDeniedException("Access denied: Only Admins can publish Master Templates.");
+        }
 
         Program program = new Program();
         program.setUser(userProxy);
@@ -71,12 +79,18 @@ public class ProgramService {
 
     @Transactional
     public ProgramResponseDTO updateProgram(UUID userId, UUID programId, ProgramRequestDTO requestDTO) {
-        // PERFORMANCE WIN: Uses EntityGraph to fetch 4 tables at once before O(1) merge
+
         Program program = programRepository.findById(programId)
                 .orElseThrow(() -> new ResourceNotFoundException("Program not found"));
 
         if (!program.getUser().getId().equals(userId)) {
             throw new AccessDeniedException("Access denied: You do not own this program");
+        }
+
+        // Payload-Based Role Security (Update Protection)
+        if (Boolean.TRUE.equals(requestDTO.getIsTemplate()) &&
+                userRepository.getReferenceById(userId).getRole() != Role.ADMIN) {
+            throw new AccessDeniedException("Access denied: Only Admins can publish Master Templates.");
         }
 
         program.setName(requestDTO.getName());

@@ -85,6 +85,17 @@ public class UserService {
         return mapToDTO(updatedUser);
     }
 
+    @Transactional
+    public UserResponseDTO updateUserRole(UUID targetUserId, com.gymapp.backend.enums.Role newRole) {
+        User user = userRepository.findById(targetUserId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        user.setRole(newRole);
+        User updatedUser = userRepository.save(user);
+
+        return mapToDTO(updatedUser);
+    }
+
     private UserResponseDTO mapToDTO(User user) {
         UserResponseDTO response = new UserResponseDTO();
         response.setId(user.getId());

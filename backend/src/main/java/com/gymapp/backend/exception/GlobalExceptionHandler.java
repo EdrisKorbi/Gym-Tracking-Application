@@ -39,9 +39,12 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.error(ex.getMessage()));
     }
 
-    // 3. Handles 403 Forbidden errors (Ownership/Security)
-    @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<ApiResponse<Void>> handleAccessDeniedException(AccessDeniedException ex) {
+    // 3. Handles 403 Forbidden errors (Ownership/Security & Soft Delete)
+    @ExceptionHandler({
+            org.springframework.security.access.AccessDeniedException.class, // Catches Spring Security's exception (Admin routes)
+            com.gymapp.backend.exception.AccessDeniedException.class         // Catches your custom exception (AuthService)
+    })
+    public ResponseEntity<ApiResponse<Void>> handleAccessDeniedException(Exception ex) {
         return ResponseEntity
                 .status(HttpStatus.FORBIDDEN)
                 .body(ApiResponse.error(ex.getMessage()));

@@ -12,3 +12,11 @@ values:
     value: ''
   - key: refreshToken
     value: ''
+  - key: workflow_email
+    value: ''
+  - key: workflow_password
+    value: ''
+  - key: user_id
+    value: ''
+  - key: template_id
+    value: ''

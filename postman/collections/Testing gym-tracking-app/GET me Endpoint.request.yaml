@@ -8,19 +8,33 @@ auth:
     id: 0d82e42f-a3e7-484d-b31d-248092b6a7db
 scripts:
   - type: afterResponse
-    code: "pm.test(\"Profile fetched successfully (200 OK)\", function () {\r
+    code: "pm.test(\"4. GET /me: Returns authenticated principal profile\", function () {\r
+
+      \    // 1. Verify the HTTP status is successful\r
 
       \    pm.response.to.have.status(200);\r
 
-      });\r
-
-      \r
-
-      pm.test(\"Response contains user email\", function () {\r
+      \    \r
 
       \    let jsonData = pm.response.json();\r
 
-      \    pm.expect(jsonData.data).to.have.property(\"email\");\r
+      \    \r
+
+      \    // 2. Verify our standard Envelope Pattern structure\r
+
+      \    pm.expect(jsonData.success).to.be.true;\r
+
+      \    pm.expect(jsonData.data).to.not.be.undefined;\r
+
+      \    \r
+
+      \    // 3. Verify the core user fields exist (resilient against variable drift)\r
+
+      \    pm.expect(jsonData.data.id).to.be.a(\"string\");\r
+
+      \    pm.expect(jsonData.data.email).to.include(\"@gym.com\");\r
+
+      \    pm.expect(jsonData.data.role).to.eql(\"USER\");\r
 
       });"
     language: text/javascript

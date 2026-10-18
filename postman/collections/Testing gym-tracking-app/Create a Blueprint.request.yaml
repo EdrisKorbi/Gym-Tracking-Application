@@ -6,51 +6,51 @@ body:
   type: json
   content: "{\r
 
-    \  \"name\": \"E2E Test Program\",\r
+    \    \"name\": \"E2E Automated Program\",\r
 
-    \  \"description\": \"Testing the Proxy Architecture\",\r
+    \    \"description\": \"Integration Test Blueprint\",\r
 
-    \  \"isTemplate\": true,\r
+    \    \"isTemplate\": false, \r
 
-    \  \"phases\": [\r
-
-    \    {\r
-
-    \      \"name\": \"Phase 1: Hypertrophy\",\r
-
-    \      \"phaseOrder\": 1,\r
-
-    \      \"routines\": [\r
+    \    \"phases\": [\r
 
     \        {\r
 
-    \          \"name\": \"Push Day\",\r
+    \            \"name\": \"Foundation Phase\",\r
 
-    \          \"dayNumber\": 1,\r
+    \            \"phaseOrder\": 1,\r
 
-    \          \"routineExercises\": [\r
+    \            \"routines\": [\r
 
-    \            {\r
+    \                {\r
 
-    \              \"name\": \"Bench Press\",\r
+    \                    \"name\": \"Full Body Workout\",\r
 
-    \              \"targetSets\": 4,\r
+    \                    \"dayNumber\": 1,\r
 
-    \              \"targetReps\": 10,\r
+    \                    \"routineExercises\": [\r
 
-    \              \"exerciseOrder\": 1\r
+    \                        {\r
 
-    \            }\r
+    \                            \"name\": \"Barbell Squats\",\r
 
-    \          ]\r
+    \                            \"targetSets\": 3,\r
+
+    \                            \"targetReps\": 10,\r
+
+    \                            \"exerciseOrder\": 1\r
+
+    \                        }\r
+
+    \                    ]\r
+
+    \                }\r
+
+    \            ]\r
 
     \        }\r
 
-    \      ]\r
-
-    \    }\r
-
-    \  ]\r
+    \    ]\r
 
     }"
 auth:
@@ -59,20 +59,16 @@ auth:
     id: 0d82e42f-a3e7-484d-b31d-248092b6a7db
 scripts:
   - type: afterResponse
-    code: "// 1. Assert the blueprint was created successfully\r
+    code: "pm.test(\"5. Create Blueprint: Saves program_id\", function () {\r
 
-      pm.test(\"Program created successfully\", function () {\r
+      \    pm.expect(pm.response.code).to.be.oneOf([200, 201]);\r
 
-      \    pm.response.to.have.status(201);\r
+      \    let jsonData = pm.response.json();\r
 
-      });\r
+      \    let id = jsonData.data ? jsonData.data.id : jsonData.id;\r
 
-      \r
+      \    pm.environment.set(\"program_id\", id);\r
 
-      // 2. Extract the ID and save it to the environment\r
-
-      let jsonData = pm.response.json();\r
-
-      pm.environment.set(\"program_id\", jsonData.data.id); // New way"
+      });"
     language: text/javascript
 order: 3000

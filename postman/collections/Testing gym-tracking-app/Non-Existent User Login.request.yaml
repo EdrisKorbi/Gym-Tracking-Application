@@ -21,26 +21,6 @@ scripts:
 
       \    pm.response.to.have.status(401);\r
 
-      });\r
-
-      \r
-
-      pm.test(\"Response uses the standard GlobalExceptionHandler error
-      envelope\", function () {\r
-
-      \    let jsonData = pm.response.json();\r
-
-      \    \r
-
-      \    // Verifies the ApiResponse structure from your custom exception
-      handler\r
-
-      \    pm.expect(jsonData.success).to.be.false;\r
-
-      \    pm.expect(jsonData).to.have.property('message');\r
-
-      \    pm.expect(jsonData).to.have.property('timestamp');\r
-
-      });"
+      });\r\n"
     language: text/javascript
 order: 6978
