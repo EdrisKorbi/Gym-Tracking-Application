@@ -1,4 +1,0 @@
-email,password,expected_status,scenario
-alex.demo@example.com,SecurePassword123,200,Valid User Login
-test@example.com,SecurePass123!,401,Banned User Blocked
-fakeuser@gym.com,WrongPass123,401,Invalid Credentials Blocked
