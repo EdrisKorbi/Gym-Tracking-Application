@@ -1,27 +1,48 @@
-# Compiled Java artifacts & Maven build output
-**/target/
-**/.mvn/
-**/mvnw
-**/mvnw.cmd
+HELP.md
+target/
+.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
 
-# IntelliJ IDEA project metadata & local cache
-.idea/
-*.iml
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### IntelliJ IDEA ###
+.idea
 *.iws
+*.iml
 *.ipr
-out/
 
-# Operating System files
-.DS_Store
-Thumbs.db
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
 
-# Node / Angular dependencies (for Phase 3)
-**/node_modules/
-**/dist/
-.angular/
+### VS Code ###
+.vscode/
 
-# Log files
-*.log
+# Project management and prompt tracking files
+progress.txt
+progress*.txt
+*Prompt*.txt
 
-# Explicitly track all text files (planning, prompts, progress logs)
-!*.txt
+### JSON test files ###
+*.json
+
+# Postman configurations and test data
+/.postman/
+/postman/
+.postman/
+postman/
+
