@@ -40,6 +40,6 @@ progress*.txt
 *.json
 
 # Postman configurations and test data
-.postman/
-postman/
+Gym-Tracking-Application/postman/
+Gym-Tracking-Application/.postman/
 
