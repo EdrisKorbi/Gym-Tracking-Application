@@ -33,6 +33,7 @@ build/
 .vscode/
 
 # Project management and prompt tracking files
+progress.txt
 progress*.txt
 *Prompt*.txt
 
@@ -40,6 +41,8 @@ progress*.txt
 *.json
 
 # Postman configurations and test data
-Gym-Tracking-Application/postman/
-Gym-Tracking-Application/.postman/
+/.postman/
+/postman/
+.postman/
+postman/
 
