@@ -54,7 +54,7 @@
 
             <div class="form-group">
                 <label for="password">Password</label>
-                <input id="password" type="password" formControlName="password" placeholder="At least 6 characters"
+                <input id="password" type="password" formControlName="password" placeholder="At least 8 characters"
                     [class.is-invalid]="registerForm.get('password')?.touched && registerForm.get('password')?.invalid" />
                 @if (registerForm.get('password')?.touched && registerForm.get('password')?.invalid) {
                 <div class="error-text">
@@ -62,7 +62,7 @@
                     <small>Password is required.</small>
                     }
                     @if (registerForm.get('password')?.hasError('minlength')) {
-                    <small>Password must be at least 6 characters long.</small>
+                    <small>Password must be at least 8 characters long.</small>
                     }
                 </div>
                 }

@@ -87,9 +87,19 @@ export class AuthService {
 
     // Runs once when the app starts up to check if the user is already logged in
     private loadUserFromStorage(): void {
-        const userJson = localStorage.getItem('user');
-        if (userJson) {
-            this.currentUser.set(JSON.parse(userJson));
+        const storedUser = localStorage.getItem('currentUser');
+
+        // Check if it exists AND ensure it's not the literal string "undefined"
+        if (storedUser && storedUser !== 'undefined') {
+            try {
+                const user = JSON.parse(storedUser);
+                this.currentUser.set(user);
+            } catch (error) {
+                // If the JSON is corrupted, catch the error, wipe the bad data, and log the user out silently
+                console.error('Corrupted session data found. Clearing storage.');
+                localStorage.removeItem('currentUser');
+                this.currentUser.set(null);
+            }
         }
     }
 }

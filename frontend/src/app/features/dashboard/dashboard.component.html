@@ -1,1 +1,50 @@
-<p>dashboard works!</p>
+<div class="dashboard-layout">
+    <!-- Top Navigation Bar -->
+    <header class="top-nav">
+        <div class="logo">FitTrack Enterprise</div>
+        <button class="btn-logout" (click)="logout()">Logout</button>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+
+        @if (isLoading()) {
+        <div class="loading-state">
+            <div class="spinner"></div>
+            <p>Loading your fitness profile...</p>
+        </div>
+        } @else {
+        <!-- Profile Header -->
+        <section class="welcome-card">
+            <h1>Welcome back, {{ currentUser()?.firstName }}!</h1>
+            <p class="role-badge" [class.admin]="currentUser()?.role === 'ADMIN'">
+                Role: {{ currentUser()?.role }}
+            </p>
+        </section>
+
+        <!-- Dashboard Grid -->
+        <section class="dashboard-grid">
+            <div class="feature-card">
+                <h3>My Workouts</h3>
+                <p>Track your daily sets, reps, and volume.</p>
+                <button class="btn-secondary">View Workouts</button>
+            </div>
+
+            <div class="feature-card">
+                <h3>My Programs</h3>
+                <p>Manage your assigned fitness routines.</p>
+                <button class="btn-secondary">View Programs</button>
+            </div>
+
+            <!-- Role-Based Access Control (RBAC) in the UI -->
+            @if (currentUser()?.role === 'ADMIN') {
+            <div class="feature-card admin-card">
+                <h3>Admin Portal</h3>
+                <p>Manage users, roles, and global settings.</p>
+                <a routerLink="/admin" class="btn-admin">Enter Admin Portal</a>
+            </div>
+            }
+        </section>
+        }
+    </main>
+</div>
