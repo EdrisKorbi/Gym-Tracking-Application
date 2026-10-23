@@ -1,74 +1,53 @@
 <div class="auth-container">
-    <div class="auth-card">
-        <h2>Create an Account</h2>
-        <p class="subtitle">Join the fitness dashboard</p>
+    <div class="auth-card neu-raised neu-extrude">
+
+        <div class="brand-header cascade-item delay-1">
+            <div class="logo neu-raised"></div>
+            <h2>Create Account</h2>
+            <p class="subtitle">Join the fitness dashboard</p>
+        </div>
 
         @if (errorMessage()) {
-        <div class="alert-banner">
+        <div class="alert-banner neu-inset cascade-item">
             {{ errorMessage() }}
         </div>
         }
 
         <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
 
-            <!-- First & Last Name Row -->
-            <div class="form-row">
+            <div class="form-row cascade-item delay-2">
                 <div class="form-group half-width">
                     <label for="firstName">First Name</label>
-                    <input id="firstName" type="text" formControlName="firstName" placeholder="John"
-                        [class.is-invalid]="registerForm.get('firstName')?.touched && registerForm.get('firstName')?.invalid" />
-                    @if (registerForm.get('firstName')?.touched && registerForm.get('firstName')?.invalid) {
-                    <div class="error-text">
-                        <small>First name is required.</small>
-                    </div>
-                    }
+                    <input id="firstName" type="text" formControlName="firstName" placeholder="John" class="neu-inset"
+                        [class.is-invalid]="isSubmitted() && registerForm.get('firstName')?.invalid" />
                 </div>
 
                 <div class="form-group half-width">
                     <label for="lastName">Last Name</label>
-                    <input id="lastName" type="text" formControlName="lastName" placeholder="Doe"
-                        [class.is-invalid]="registerForm.get('lastName')?.touched && registerForm.get('lastName')?.invalid" />
-                    @if (registerForm.get('lastName')?.touched && registerForm.get('lastName')?.invalid) {
-                    <div class="error-text">
-                        <small>Last name is required.</small>
-                    </div>
-                    }
+                    <input id="lastName" type="text" formControlName="lastName" placeholder="Doe" class="neu-inset"
+                        [class.is-invalid]="isSubmitted() && registerForm.get('lastName')?.invalid" />
                 </div>
             </div>
 
-            <div class="form-group">
+            <div class="form-group cascade-item delay-3">
                 <label for="email">Email Address</label>
-                <input id="email" type="email" formControlName="email" placeholder="name@example.com"
-                    [class.is-invalid]="registerForm.get('email')?.touched && registerForm.get('email')?.invalid" />
-                @if (registerForm.get('email')?.touched && registerForm.get('email')?.invalid) {
-                <div class="error-text">
-                    @if (registerForm.get('email')?.hasError('required')) {
-                    <small>Email is required.</small>
-                    }
-                    @if (registerForm.get('email')?.hasError('email')) {
-                    <small>Please enter a valid email.</small>
-                    }
-                </div>
+                <input id="email" type="email" formControlName="email" placeholder="name@example.com" class="neu-inset"
+                    [class.is-invalid]="isSubmitted() && registerForm.get('email')?.invalid" />
+                @if (isSubmitted() && registerForm.get('email')?.invalid) {
+                <div class="error-text"><small>Valid email is required.</small></div>
                 }
             </div>
 
-            <div class="form-group">
+            <div class="form-group cascade-item delay-4">
                 <label for="password">Password</label>
                 <input id="password" type="password" formControlName="password" placeholder="At least 8 characters"
-                    [class.is-invalid]="registerForm.get('password')?.touched && registerForm.get('password')?.invalid" />
-                @if (registerForm.get('password')?.touched && registerForm.get('password')?.invalid) {
-                <div class="error-text">
-                    @if (registerForm.get('password')?.hasError('required')) {
-                    <small>Password is required.</small>
-                    }
-                    @if (registerForm.get('password')?.hasError('minlength')) {
-                    <small>Password must be at least 8 characters long.</small>
-                    }
-                </div>
+                    class="neu-inset" [class.is-invalid]="isSubmitted() && registerForm.get('password')?.invalid" />
+                @if (isSubmitted() && registerForm.get('password')?.invalid) {
+                <div class="error-text"><small>Password must be at least 8 characters long.</small></div>
                 }
             </div>
 
-            <button type="submit" class="btn-primary" [disabled]="isLoading() || registerForm.invalid">
+            <button type="submit" class="neu-btn-primary full-width cascade-item delay-5" [disabled]="isLoading()">
                 @if (isLoading()) {
                 <span>Creating Account...</span>
                 } @else {
@@ -78,7 +57,7 @@
 
         </form>
 
-        <div class="auth-footer">
+        <div class="auth-footer cascade-item delay-5">
             <p>Already have an account? <a routerLink="/login">Sign in here</a></p>
         </div>
     </div>

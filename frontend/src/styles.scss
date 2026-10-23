@@ -1,1 +1,193 @@
-/* You can add global styles to this file, and also import other style files */
+/* =========================================
+   GLOBAL THEME VARIABLES
+========================================= */
+:root {
+    /* LIGHT / AIRY THEME (Default) */
+    --bg-color: #e6eef5;
+    /* Soft icy blue-gray from your second image */
+    --text-main: #2d3748;
+    --text-muted: #718096;
+
+    --shadow-light: #ffffff;
+    --shadow-dark: #c3d2e0;
+
+    --accent-color: #4a86e8;
+    /* Crisp blue from your first image */
+    --accent-hover: #3a70c4;
+    --error-color: #ff6b6b;
+}
+
+[data-theme="dark"] {
+    /* DARK THEME */
+    --bg-color: #292d32;
+    /* Deep matte charcoal */
+    --text-main: #e2e8f0;
+    --text-muted: #a0aec0;
+
+    --shadow-light: #363b42;
+    --shadow-dark: #1c1e22;
+
+    --accent-color: #5c7cfa;
+    /* Slightly brighter blue for dark mode contrast */
+    --accent-hover: #4c6be6;
+    --error-color: #fa5252;
+}
+
+/* =========================================
+   BASE STYLES & RESET
+========================================= */
+body {
+    margin: 0;
+    padding: 0;
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    min-height: 100vh;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* =========================================
+   NEUMORPHIC UTILITY CLASSES
+========================================= */
+
+/* 1. Convex (Raised) - Used for Cards, Dashboards, and normal Buttons */
+.neu-raised {
+    background: var(--bg-color);
+    border-radius: 16px;
+    box-shadow:
+        8px 8px 16px var(--shadow-dark),
+        -8px -8px 16px var(--shadow-light);
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+/* 2. Concave (Pressed/Inset) - Used for Inputs, Checkboxes, and Active Buttons */
+.neu-inset {
+    background: var(--bg-color);
+    border-radius: 12px;
+    box-shadow:
+        inset 6px 6px 12px var(--shadow-dark),
+        inset -6px -6px 12px var(--shadow-light);
+}
+
+/* 3. Neumorphic Button Standard */
+.neu-btn {
+    background: var(--bg-color);
+    color: var(--text-main);
+    border: none;
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow:
+        6px 6px 12px var(--shadow-dark),
+        -6px -6px 12px var(--shadow-light);
+    transition: all 0.2s ease;
+    outline: none;
+
+    &:hover {
+        color: var(--accent-color);
+    }
+
+    &:active {
+        box-shadow:
+            inset 4px 4px 8px var(--shadow-dark),
+            inset -4px -4px 8px var(--shadow-light);
+    }
+}
+
+/* 4. Primary Accent Button (Blue filled) */
+.neu-btn-primary {
+    background: var(--accent-color);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    /* Still uses outer shadows to float, but inner gradient for depth */
+    box-shadow:
+        6px 6px 12px var(--shadow-dark),
+        -6px -6px 12px var(--shadow-light);
+    transition: all 0.2s ease;
+
+    &:hover {
+        background: var(--accent-hover);
+    }
+
+    &:active {
+        transform: scale(0.97);
+    }
+}
+
+/* =========================================
+   3D NEUMORPHIC ANIMATION ENGINE
+========================================= */
+
+/* 1. The Card Extrusion: Starts flat in the wall, then pushes out into 3D space */
+.neu-extrude {
+    animation: surfaceExtrude 0.65s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    transform-origin: center center;
+}
+
+@keyframes surfaceExtrude {
+    0% {
+        opacity: 0;
+        transform: perspective(900px) rotateX(10deg) translateY(12px) scale(0.95);
+        /* Starts completely flat with 0px shadows */
+        box-shadow:
+            0px 0px 0px var(--shadow-dark),
+            0px 0px 0px var(--shadow-light);
+    }
+
+    35% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 1;
+        transform: perspective(900px) rotateX(0deg) translateY(0) scale(1);
+        /* Rises out of the background with deep dual shadows */
+        box-shadow:
+            10px 10px 20px var(--shadow-dark),
+            -10px -10px 20px var(--shadow-light);
+    }
+}
+
+/* 2. Inner Element Cascade: Staggers the header, inputs, and buttons */
+.cascade-item {
+    opacity: 0;
+    animation: cascadeSlide 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes cascadeSlide {
+    0% {
+        opacity: 0;
+        transform: translateY(12px) scale(0.98);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Delay timers so each row appears sequentially */
+.delay-1 {
+    animation-delay: 0.08s;
+}
+
+.delay-2 {
+    animation-delay: 0.15s;
+}
+
+.delay-3 {
+    animation-delay: 0.22s;
+}
+
+.delay-4 {
+    animation-delay: 0.29s;
+}
+
+.delay-5 {
+    animation-delay: 0.36s;
+}

@@ -19,6 +19,7 @@ export class LoginComponent {
   // UI State Signals
   isLoading = signal<boolean>(false);
   errorMessage = signal<string | null>(null);
+  isSubmitted = signal<boolean>(false); // <-- Add this new Signal
 
   // Enterprise Reactive Form Definition
   loginForm = this.fb.nonNullable.group({
@@ -27,8 +28,9 @@ export class LoginComponent {
   });
 
   onSubmit(): void {
+    this.isSubmitted.set(true); // <-- Flip the switch when the button is clicked
+
     if (this.loginForm.invalid) {
-      this.loginForm.markAllAsTouched();
       return;
     }
 

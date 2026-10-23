@@ -1,50 +1,61 @@
-<div class="dashboard-layout">
+<div class="dashboard-container">
+
     <!-- Top Navigation Bar -->
-    <header class="top-nav">
-        <div class="logo">FitTrack Enterprise</div>
-        <button class="btn-logout" (click)="logout()">Logout</button>
-    </header>
+    <nav class="top-nav cascade-item delay-1">
+        <div class="brand">
+            <div class="logo neu-raised"></div>
+            <h2>FitnessApp</h2>
+        </div>
+
+        <div class="nav-actions">
+            <!-- Theme Toggle Button -->
+            <button class="neu-btn icon-btn" (click)="toggleTheme()" aria-label="Toggle Theme">
+                @if (isDarkMode()) {
+                <span>☀️</span>
+                } @else {
+                <span>🌙</span>
+                }
+            </button>
+
+            <!-- Logout Button -->
+            <button class="neu-btn" (click)="logout()">Sign Out</button>
+        </div>
+    </nav>
 
     <!-- Main Content Area -->
-    <main class="main-content">
+    <main class="dashboard-content">
 
-        @if (isLoading()) {
-        <div class="loading-state">
-            <div class="spinner"></div>
-            <p>Loading your fitness profile...</p>
-        </div>
-        } @else {
-        <!-- Profile Header -->
-        <section class="welcome-card">
+        <!-- Welcome Card -->
+        <div class="welcome-card neu-raised neu-extrude cascade-item delay-2">
             <h1>Welcome back, {{ currentUser()?.firstName }}!</h1>
-            <p class="role-badge" [class.admin]="currentUser()?.role === 'ADMIN'">
-                Role: {{ currentUser()?.role }}
-            </p>
-        </section>
+            <p>Ready to crush your goals today?</p>
 
-        <!-- Dashboard Grid -->
-        <section class="dashboard-grid">
-            <div class="feature-card">
-                <h3>My Workouts</h3>
-                <p>Track your daily sets, reps, and volume.</p>
-                <button class="btn-secondary">View Workouts</button>
-            </div>
-
-            <div class="feature-card">
-                <h3>My Programs</h3>
-                <p>Manage your assigned fitness routines.</p>
-                <button class="btn-secondary">View Programs</button>
-            </div>
-
-            <!-- Role-Based Access Control (RBAC) in the UI -->
+            <!-- Admin Only Button -->
             @if (currentUser()?.role === 'ADMIN') {
-            <div class="feature-card admin-card">
-                <h3>Admin Portal</h3>
-                <p>Manage users, roles, and global settings.</p>
-                <a routerLink="/admin" class="btn-admin">Enter Admin Portal</a>
-            </div>
+            <button class="neu-btn-primary mt-4">Open Admin Portal</button>
             }
-        </section>
-        }
+        </div>
+
+        <!-- Fitness Statistics Grid -->
+        <div class="stats-grid cascade-item delay-3">
+
+            <!-- Concave (Inset) Data Displays -->
+            <div class="stat-card neu-inset">
+                <h3>Total Workouts</h3>
+                <p class="stat-value">0</p>
+            </div>
+
+            <div class="stat-card neu-inset">
+                <h3>Active Time</h3>
+                <p class="stat-value">0 <span class="unit">min</span></p>
+            </div>
+
+            <div class="stat-card neu-inset">
+                <h3>Current Streak</h3>
+                <p class="stat-value">0 <span class="unit">days</span></p>
+            </div>
+
+        </div>
     </main>
+
 </div>

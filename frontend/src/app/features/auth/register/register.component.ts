@@ -18,6 +18,7 @@ export class RegisterComponent {
 
   isLoading = signal<boolean>(false);
   errorMessage = signal<string | null>(null);
+  isSubmitted = signal<boolean>(false); // <-- Added
 
   registerForm = this.fb.nonNullable.group({
     firstName: ['', [Validators.required]],
@@ -27,8 +28,9 @@ export class RegisterComponent {
   });
 
   onSubmit(): void {
+    this.isSubmitted.set(true);
+
     if (this.registerForm.invalid) {
-      this.registerForm.markAllAsTouched();
       return;
     }
 
