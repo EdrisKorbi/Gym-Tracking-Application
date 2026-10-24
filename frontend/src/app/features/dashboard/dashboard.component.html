@@ -1,61 +1,248 @@
-<div class="dashboard-container">
+<div class="app-shell">
 
-    <!-- Top Navigation Bar -->
-    <nav class="top-nav cascade-item delay-1">
-        <div class="brand">
-            <div class="logo neu-raised"></div>
-            <h2>FitnessApp</h2>
-        </div>
+    <!-- SOLID STICKY MASK -->
+    <div class="sticky-header-mask">
+        <header class="top-header neu-raised cascade-item delay-1">
+            <div class="header-left">
+                <div class="brand">
+                    <div class="brand-logo neu-raised"></div>
+                    <div class="brand-text">
+                        <span class="brand-name">FitPulse</span>
+                        <span class="brand-sub">Performance</span>
+                    </div>
+                </div>
 
-        <div class="nav-actions">
-            <!-- Theme Toggle Button -->
-            <button class="neu-btn icon-btn" (click)="toggleTheme()" aria-label="Toggle Theme">
-                @if (isDarkMode()) {
-                <span>☀️</span>
-                } @else {
-                <span>🌙</span>
+                <app-neu-segmented [options]="topTabs" [selected]="selectedTopTab()"
+                    (selectedChange)="onTopTabChange($event)" />
+            </div>
+
+            <div class="header-right">
+                <div class="search-box neu-inset">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" placeholder="Search workouts..." />
+                    <kbd class="shortcut">⌘K</kbd>
+                </div>
+
+                <div class="theme-pill neu-inset" [class.dark]="isDarkMode()" title="Switch Theme">
+                    <div class="theme-thumb"></div>
+                    <button type="button" class="theme-btn" [class.active]="!isDarkMode()" (click)="setTheme(false)"
+                        aria-label="Light Mode">
+                        ☀️
+                    </button>
+                    <button type="button" class="theme-btn" [class.active]="isDarkMode()" (click)="setTheme(true)"
+                        aria-label="Dark Mode">
+                        🌙
+                    </button>
+                </div>
+
+                <app-neu-button variant="icon" [badge]="3" title="Notifications">🔔</app-neu-button>
+
+                <app-neu-button variant="primary">
+                    <span>+</span>
+                    <span>New Workout</span>
+                </app-neu-button>
+
+                <div class="user-chip neu-raised">
+                    <div class="avatar neu-inset">
+                        {{ currentUser()?.firstName?.charAt(0) || 'E' }}
+                    </div>
+                    <span class="user-full-name">
+                        {{ currentUser()?.firstName || 'Athlete' }} {{ currentUser()?.lastName || '' }}
+                    </span>
+                </div>
+
+                <app-neu-button variant="danger" (clicked)="logout()">
+                    Logout
+                </app-neu-button>
+            </div>
+        </header>
+    </div>
+
+    <!-- WORKSPACE BODY -->
+    <div class="workspace">
+
+        <!-- LEFT VERTICAL DOCK: All 6 icons use identical variant="icon" + [active] binding -->
+        <aside class="left-sidebar cascade-item delay-2">
+            <nav class="icon-dock neu-raised">
+                <app-neu-button variant="icon" [active]="activeSideIcon() === 'grid'"
+                    (clicked)="activeSideIcon.set('grid')" title="Overview">
+                    ⊞
+                </app-neu-button>
+                <app-neu-button variant="icon" [badge]="1" [active]="activeSideIcon() === 'workouts'"
+                    (clicked)="activeSideIcon.set('workouts')" title="Workouts">
+                    🏋️
+                </app-neu-button>
+                <app-neu-button variant="icon" [badge]="7" [active]="activeSideIcon() === 'programs'"
+                    (clicked)="activeSideIcon.set('programs')" title="Programs">
+                    📋
+                </app-neu-button>
+                <app-neu-button variant="icon" [active]="activeSideIcon() === 'nutrition'"
+                    (clicked)="activeSideIcon.set('nutrition')" title="Nutrition">
+                    🥗
+                </app-neu-button>
+                <app-neu-button variant="icon" [active]="activeSideIcon() === 'analytics'"
+                    (clicked)="activeSideIcon.set('analytics')" title="Analytics">
+                    📈
+                </app-neu-button>
+                <app-neu-button variant="icon" [active]="activeSideIcon() === 'community'"
+                    (clicked)="activeSideIcon.set('community')" title="Community">
+                    👥
+                </app-neu-button>
+            </nav>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="main-panel">
+
+            <!-- Subheader & Controls -->
+            <section class="reports-toolbar cascade-item delay-2">
+                <div class="toolbar-titles">
+                    <p class="eyebrow">Build a report from your own numbers</p>
+                    <h1>{{ selectedTopTab() }} Reports</h1>
+                </div>
+
+                <div class="toolbar-actions">
+                    @if (currentUser()?.role === 'ADMIN') {
+                    <app-neu-button variant="secondary">🛡️ Admin Portal</app-neu-button>
+                    }
+                    <app-neu-segmented [options]="rangeOptions" [selected]="selectedRange()"
+                        (selectedChange)="onRangeChange($event)" />
+                    <app-neu-button variant="primary">↓ Export CSV</app-neu-button>
+                </div>
+            </section>
+
+            <!-- 6-CARD KPI GRID -->
+            <section class="kpi-grid cascade-item delay-3">
+                @for (card of kpiCards; track card.title) {
+                <app-neu-stat-card [icon]="card.icon" [title]="card.title" [value]="card.value" [trend]="card.trend"
+                    [isPositive]="card.isPositive" [highlighted]="card.highlighted" [sparklinePath]="card.sparkline" />
                 }
-            </button>
+            </section>
 
-            <!-- Logout Button -->
-            <button class="neu-btn" (click)="logout()">Sign Out</button>
-        </div>
-    </nav>
+            <!-- MAIN CHART PANEL -->
+            <section class="chart-card neu-raised cascade-item delay-4">
+                <div class="chart-top-bar">
+                    <div>
+                        <h3>Training Output & Calories</h3>
+                        <p class="chart-sub">Last {{ selectedRange() }} · by {{ selectedGranularity().toLowerCase() }}
+                        </p>
+                    </div>
 
-    <!-- Main Content Area -->
-    <main class="dashboard-content">
+                    <div class="chart-controls">
+                        <app-neu-segmented [options]="chartGranularity" [selected]="selectedGranularity()"
+                            (selectedChange)="onGranularityChange($event)" />
 
-        <!-- Welcome Card -->
-        <div class="welcome-card neu-raised neu-extrude cascade-item delay-2">
-            <h1>Welcome back, {{ currentUser()?.firstName }}!</h1>
-            <p>Ready to crush your goals today?</p>
+                        <div class="compare-toggle" (click)="toggleCompare()">
+                            <div class="switch-track neu-inset" [class.on]="compareMode()">
+                                <div class="switch-thumb"></div>
+                            </div>
+                            <span>Compare</span>
+                        </div>
+                    </div>
+                </div>
 
-            <!-- Admin Only Button -->
-            @if (currentUser()?.role === 'ADMIN') {
-            <button class="neu-btn-primary mt-4">Open Admin Portal</button>
-            }
-        </div>
+                <!-- Channel Pills & Legend -->
+                <div class="chart-filter-bar">
+                    <div class="channel-pills">
+                        @for (ch of channels; track ch.name) {
+                        <button type="button" class="channel-pill" [class.active]="activeChannel() === ch.name"
+                            (click)="activeChannel.set(ch.name)">
+                            <span class="dot" [style.background]="ch.color"></span>
+                            {{ ch.name }}
+                        </button>
+                        }
+                    </div>
 
-        <!-- Fitness Statistics Grid -->
-        <div class="stats-grid cascade-item delay-3">
+                    <div class="chart-legend">
+                        <span class="legend-item">
+                            <span class="dot" style="background: var(--accent-color)"></span> Current Period
+                        </span>
+                        <span class="legend-item">
+                            <span class="dashed-line"></span> Previous {{ selectedRange() }}
+                        </span>
+                    </div>
+                </div>
 
-            <!-- Concave (Inset) Data Displays -->
-            <div class="stat-card neu-inset">
-                <h3>Total Workouts</h3>
-                <p class="stat-value">0</p>
-            </div>
+                <!-- Bounded Monotone Cubic SVG Chart with Smooth Morphing -->
+                <div class="chart-canvas">
+                    <div class="y-axis">
+                        <span>5,000 kcal</span>
+                        <span>2,500 kcal</span>
+                        <span>0 kcal</span>
+                    </div>
 
-            <div class="stat-card neu-inset">
-                <h3>Active Time</h3>
-                <p class="stat-value">0 <span class="unit">min</span></p>
-            </div>
+                    <div class="chart-stage">
+                        <div class="svg-wrapper">
+                            <svg viewBox="0 0 900 230" preserveAspectRatio="none" class="main-svg">
+                                <defs>
+                                    <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="0%" stop-color="var(--accent-color)" stop-opacity="0.32" />
+                                        <stop offset="100%" stop-color="var(--accent-color)" stop-opacity="0.0" />
+                                    </linearGradient>
+                                </defs>
 
-            <div class="stat-card neu-inset">
-                <h3>Current Streak</h3>
-                <p class="stat-value">0 <span class="unit">days</span></p>
-            </div>
+                                <!-- Horizontal Reference Grid Lines -->
+                                <line x1="20" y1="35" x2="880" y2="35" class="grid-line" />
+                                <line x1="20" y1="127" x2="880" y2="127" class="grid-line" />
+                                <line x1="20" y1="220" x2="880" y2="220" class="grid-line" />
 
-        </div>
-    </main>
+                                <!-- Active Point Vertical Guide Line -->
+                                <line [attr.x1]="activePoint().x" y1="35" [attr.x2]="activePoint().x" y2="220"
+                                    class="guide-line" />
 
+                                <!-- Previous Period Dashed Curve (CSS path morphing) -->
+                                @if (compareMode()) {
+                                <path [attr.d]="prevLinePath()" [style.d]="'path(\'' + prevLinePath() + '\')'"
+                                    fill="none" stroke="var(--text-muted)" stroke-width="2" stroke-dasharray="6 5"
+                                    opacity="0.6" class="morph-path" />
+                                }
+
+                                <!-- Current Period Area Fill (CSS path morphing) -->
+                                <path [attr.d]="currentAreaPath()" [style.d]="'path(\'' + currentAreaPath() + '\')'"
+                                    fill="url(#areaGrad)" class="morph-path" />
+
+                                <!-- Current Period Solid Curve (CSS path morphing) -->
+                                <path [attr.d]="currentLinePath()" [style.d]="'path(\'' + currentLinePath() + '\')'"
+                                    fill="none" stroke="var(--accent-color)" stroke-width="3" stroke-linecap="round"
+                                    class="morph-path" />
+
+                                <!-- Interactive Data Nodes -->
+                                @for (pt of chartPoints(); track $index; let idx = $index) {
+                                <circle [attr.cx]="pt.x" [attr.cy]="pt.y" [attr.r]="hoveredPointIndex() === idx ? 6 : 4"
+                                    class="chart-node" [class.active]="hoveredPointIndex() === idx"
+                                    (mouseenter)="hoveredPointIndex.set(idx)" />
+                                }
+                            </svg>
+
+                            <!-- Floating Neumorphic Tooltip -->
+                            <div class="chart-tooltip neu-raised" [style.left.%]="(activePoint().x / 900) * 100"
+                                [style.top.px]="activePoint().y - 10">
+                                <div class="tooltip-date">{{ activePoint().label }}</div>
+                                <div class="tooltip-row">
+                                    <span class="dot" style="background: var(--accent-color)"></span>
+                                    <span>Output</span>
+                                    <strong>{{ activePoint().kcal }}</strong>
+                                </div>
+                                @if (compareMode()) {
+                                <div class="tooltip-row muted">
+                                    <span class="dot" style="background: var(--text-muted)"></span>
+                                    <span>Prev.</span>
+                                    <strong>{{ activePoint().prevKcal }}</strong>
+                                </div>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- X-Axis Timeline Labels -->
+                        <div class="x-axis">
+                            @for (pt of chartPoints(); track $index) {
+                            <span>{{ pt.label }}</span>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
 </div>

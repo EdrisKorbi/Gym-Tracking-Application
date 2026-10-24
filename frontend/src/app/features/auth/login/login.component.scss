@@ -6,7 +6,6 @@
     padding: 1rem;
     box-sizing: border-box;
     overflow: hidden;
-    /* Guarantees zero scrollbar jumping during animations */
 }
 
 .auth-card {
@@ -29,7 +28,6 @@
     margin-bottom: 1.5rem;
     text-align: center;
 
-    /* Tactile 3D Concentric Dial */
     .logo {
         width: 52px;
         height: 52px;
@@ -91,11 +89,15 @@
     input {
         width: 100%;
         padding: 0.85rem 1rem;
-        border: none;
+        border: none !important;
+        outline: none !important;
         color: var(--text-main);
         font-size: 0.95rem;
         box-sizing: border-box;
-        transition: outline 0.2s ease, box-shadow 0.2s ease;
+        box-shadow:
+            0 0 0 2px var(--surface-color),
+            inset 4px 4px 8px var(--shadow-dark),
+            inset -3px -3px 7px var(--shadow-light);
 
         &::placeholder {
             color: var(--text-muted);
@@ -103,13 +105,17 @@
         }
 
         &:focus {
-            outline: 2px solid var(--accent-color);
-            outline-offset: -2px;
+            box-shadow:
+                0 0 0 2px var(--accent-color),
+                inset 4px 4px 8px var(--shadow-dark),
+                inset -3px -3px 7px var(--shadow-light);
         }
 
         &.is-invalid {
-            outline: 2px solid var(--error-color);
-            outline-offset: -2px;
+            box-shadow:
+                0 0 0 2px var(--error-color),
+                inset 4px 4px 8px var(--shadow-dark),
+                inset -3px -3px 7px var(--shadow-light);
         }
     }
 
