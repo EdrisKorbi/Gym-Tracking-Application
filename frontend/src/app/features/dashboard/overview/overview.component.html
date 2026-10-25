@@ -1,0 +1,6 @@
+<section class="kpi-grid cascade-item delay-3">
+    @for (card of kpiCards(); track card.title) {
+    <app-neu-stat-card [icon]="card.icon" [title]="card.title" [value]="card.value" [trend]="card.trend"
+        [isPositive]="card.isPositive" [highlighted]="card.highlighted" [sparklinePath]="card.sparkline" />
+    }
+</section>

@@ -17,7 +17,23 @@ export const routes: Routes = [
     {
         path: '',
         loadComponent: () => import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent),
-        canActivate: [authGuard]
+        canActivate: [authGuard],
+        // NEW: Enterprise Child Routes
+        children: [
+            {
+                path: '',
+                redirectTo: 'overview',
+                pathMatch: 'full' // Redirects localhost:4200/ immediately to /overview
+            },
+            {
+                path: 'overview',
+                loadComponent: () => import('./features/dashboard/overview/overview.component').then(m => m.OverviewComponent)
+            },
+            {
+                path: 'workouts',
+                loadComponent: () => import('./features/workouts/workouts.component').then(m => m.WorkoutsComponent)
+            }
+        ]
     },
     {
         path: 'admin',
