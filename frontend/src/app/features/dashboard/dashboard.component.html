@@ -87,7 +87,7 @@
 
                 <div class="toolbar-actions">
                     @if (currentUser()?.role === 'ADMIN') {
-                    <app-neu-button variant="secondary">🛡️ Admin Portal</app-neu-button>
+                    <app-neu-button variant="secondary" (clicked)="goToAdmin()">🛡️ Admin Portal</app-neu-button>
                     }
                     <app-neu-segmented [options]="rangeOptions" [selected]="selectedRange()"
                         (selectedChange)="onRangeChange($event)" />

@@ -1,5 +1,6 @@
 package com.gymapp.backend.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.gymapp.backend.enums.Role;
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -11,7 +12,10 @@ public class UserResponseDTO {
     private String firstName;
     private String lastName;
     private Role role; // NEW
+
+    @JsonProperty("isActive")
     private boolean isActive; // NEW
+
     private LocalDateTime createdAt;
 
     // --- Getters and Setters ---

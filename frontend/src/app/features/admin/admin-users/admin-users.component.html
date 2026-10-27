@@ -1,1 +1,118 @@
-<p>admin-users works!</p>
+<div class="admin-workspace cascade-item delay-1">
+
+    <header class="admin-header">
+        <div>
+            <h1>User Management</h1>
+            <p class="subtitle">Total Registered Users: <strong>{{ totalElements() }}</strong></p>
+        </div>
+        <app-neu-button variant="primary" (clicked)="loadUsers(0)">
+            <span>↻</span> Refresh Data
+        </app-neu-button>
+    </header>
+
+    @if (errorMessage()) {
+    <div class="error-banner neu-raised">
+        <span class="icon">⚠️</span>
+        <p>{{ errorMessage() }}</p>
+        <button class="dismiss-btn" (click)="errorMessage.set(null)">✕</button>
+    </div>
+    }
+
+    <div class="table-container neu-inset">
+        @if (isPageLoading()) {
+        <div class="loading-overlay">
+            <div class="spinner"></div>
+            <p>Synchronizing with database...</p>
+        </div>
+        }
+
+        <table class="neu-table">
+            <thead>
+                <tr>
+                    <th>Athlete</th>
+                    <th>Email Address</th>
+                    <th>Joined Date</th>
+                    <th>Role</th>
+                    <th>Status</th>
+                    <th class="actions-col">Security Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Track by ID ensures Angular only re-renders rows that actually change -->
+                @for (user of users(); track user.id) {
+                <tr [class.is-banned]="!user.isActive" [class.is-updating]="updatingUserId() === user.id">
+                    <td class="user-cell">
+                        <div class="avatar neu-raised">
+                            {{ user.firstName.charAt(0) }}{{ user.lastName.charAt(0) }}
+                        </div>
+                        <div class="name-block">
+                            <span class="full-name">{{ user.firstName }} {{ user.lastName }}</span>
+                            @if (isSelf(user.id)) {
+                            <span class="badge self-badge">You</span>
+                            }
+                        </div>
+                    </td>
+                    <td class="mono">{{ user.email }}</td>
+                    <td>{{ user.createdAt | date:'mediumDate' }}</td>
+
+                    <!-- Role Badge -->
+                    <td>
+                        <span class="role-badge" [class.admin]="user.role === 'ADMIN'">
+                            {{ user.role }}
+                        </span>
+                    </td>
+
+                    <!-- Status Badge -->
+                    <td>
+                        <div class="status-indicator">
+                            <span class="dot" [class.active]="user.isActive" [class.banned]="!user.isActive"></span>
+                            {{ user.isActive ? 'Active' : 'Suspended' }}
+                        </div>
+                    </td>
+
+                    <!-- Action Buttons -->
+                    <td class="actions-col">
+                        <div class="action-group">
+                            <!-- Role Toggle -->
+                            <button class="neu-action-btn" [disabled]="isSelf(user.id) || updatingUserId() !== null"
+                                (click)="toggleUserRole(user)"
+                                [title]="user.role === 'ADMIN' ? 'Demote to User' : 'Promote to Admin'">
+                                {{ user.role === 'ADMIN' ? '↓ Demote' : '↑ Promote' }}
+                            </button>
+
+                            <!-- Ban Toggle -->
+                            <button class="neu-action-btn danger"
+                                [disabled]="isSelf(user.id) || updatingUserId() !== null"
+                                (click)="toggleUserStatus(user)"
+                                [title]="user.isActive ? 'Suspend Account' : 'Reactivate Account'">
+                                {{ user.isActive ? '⊘ Ban' : '✓ Unban' }}
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                } @empty {
+                <tr>
+                    <td colspan="6" class="empty-state">No users found in the system.</td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination Controls -->
+    <footer class="pagination-footer">
+        <p class="page-info">
+            Page {{ currentPage() + 1 }} of {{ totalPages() || 1 }}
+        </p>
+        <div class="page-controls">
+            <app-neu-button variant="secondary" [disabled]="currentPage() === 0 || isPageLoading()"
+                (clicked)="goToPreviousPage()">
+                ← Previous
+            </app-neu-button>
+            <app-neu-button variant="secondary" [disabled]="currentPage() >= totalPages() - 1 || isPageLoading()"
+                (clicked)="goToNextPage()">
+                Next →
+            </app-neu-button>
+        </div>
+    </footer>
+</div>

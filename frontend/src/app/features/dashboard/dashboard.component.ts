@@ -52,10 +52,16 @@ export class DashboardComponent implements OnInit {
     }
   }
 
+  // 3. Add the navigation method
+  goToAdmin(): void {
+    this.router.navigate(['/admin']);
+  }
+
   loadFreshProfile(): void {
     this.userService.getProfile().subscribe({
       next: (response) => {
         this.currentUser.set(response.data);
+        this.authService.syncProfile(response.data);
         this.isLoading.set(false);
       },
       error: () => this.logout()

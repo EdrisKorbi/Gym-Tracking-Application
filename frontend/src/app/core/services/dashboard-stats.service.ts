@@ -24,15 +24,33 @@ export class DashboardStatsService {
             maxTime = Math.max(...workouts.map(w => new Date(w.date).getTime()));
         }
 
-        workouts.forEach(workout => {
+        // Arrays to hold historical data for our sparklines
+        const setsTrend: number[] = [];
+        const repsTrend: number[] = [];
+
+        // The API returns workouts sorted date,desc (newest first).
+        // We reverse a copy of the array so our charts read left-to-right (oldest to newest).
+        const chronologicalWorkouts = [...workouts].reverse();
+
+        chronologicalWorkouts.forEach(workout => {
             if (workout.status === 'COMPLETED') {
                 completedWorkouts++;
             }
 
+            let workoutSets = 0;
+            let workoutReps = 0;
+
             workout.exercises?.forEach(ex => {
                 totalSets += ex.sets;
                 totalReps += (ex.sets * ex.reps);
+                
+                workoutSets += ex.sets;
+                workoutReps += (ex.sets * ex.reps);
             });
+
+            // Push this workout's total into our trend arrays
+            setsTrend.push(workoutSets);
+            repsTrend.push(workoutReps);
         });
 
         const avgSetsPerSession = completedWorkouts > 0 ? Math.round(totalSets / completedWorkouts) : 0;
@@ -43,15 +61,18 @@ export class DashboardStatsService {
         const weeksSpan = Math.max(1, daysSpan / 7);
         const weeklySets = Math.round(totalSets / weeksSpan);
 
+        // A simple upward trending array for "Total Workouts"
+        const workoutCountTrend = chronologicalWorkouts.map((_, index) => index + 1);
+
         return [
             {
                 icon: '📊',
                 title: 'Avg Sets / Session',
                 value: `${avgSetsPerSession}`,
-                trend: '--',
+                trend: '--', 
                 isPositive: true,
                 highlighted: true,
-                sparkline: 'M2 22 L14 14 L26 19 L38 8 L50 16 L64 4 L78 12'
+                sparkline: this.generateSparkline(setsTrend)
             },
             {
                 icon: '🏋️',
@@ -60,7 +81,7 @@ export class DashboardStatsService {
                 trend: '--',
                 isPositive: true,
                 highlighted: false,
-                sparkline: 'M2 18 L16 22 L30 10 L44 15 L58 6 L78 9'
+                sparkline: this.generateSparkline(workoutCountTrend)
             },
             {
                 icon: '📅',
@@ -69,7 +90,7 @@ export class DashboardStatsService {
                 trend: '--',
                 isPositive: true,
                 highlighted: false,
-                sparkline: 'M2 20 L18 16 L32 19 L48 11 L62 14 L78 5'
+                sparkline: this.generateSparkline(setsTrend)
             },
             {
                 icon: '📈',
@@ -78,7 +99,7 @@ export class DashboardStatsService {
                 trend: '--',
                 isPositive: true,
                 highlighted: false,
-                sparkline: 'M2 19 L16 15 L32 21 L48 12 L64 14 L78 7'
+                sparkline: this.generateSparkline(repsTrend)
             },
             {
                 icon: '🎯',
@@ -87,9 +108,57 @@ export class DashboardStatsService {
                 trend: '--',
                 isPositive: true,
                 highlighted: false,
-                sparkline: 'M2 16 L16 14 L30 18 L46 10 L62 12 L78 6'
+                // Using setsTrend here just to keep the line active and visually matching
+                sparkline: this.generateSparkline(setsTrend) 
             }
         ];
+    }
+
+    /**
+     * Translates an array of numeric data into an SVG path string.
+     * Maps X from 2 to 78, and Y from 22 (bottom) to 4 (top).
+     */
+    private generateSparkline(data: number[]): string {
+        if (!data || data.length === 0) return '';
+        if (data.length === 1) return `M 2 13 L 78 13`; // Flat middle line if only 1 data point
+
+        const maxVal = Math.max(...data);
+        const minVal = Math.min(...data);
+        const range = maxVal - minVal;
+
+        // X-axis mapping parameters
+        const startX = 2;
+        const endX = 78;
+        const width = endX - startX;
+        const stepX = width / (data.length - 1);
+
+        // Y-axis mapping parameters
+        const minY = 4;  // Highest peak (closest to top)
+        const maxY = 22; // Lowest trough (closest to bottom)
+        const height = maxY - minY;
+
+        let path = '';
+
+        data.forEach((val, index) => {
+            const currentX = Math.round(startX + (index * stepX));
+            
+            let currentY = maxY; // Default to bottom if flat
+            if (range !== 0) {
+                // Determine percentage of max (0.0 to 1.0)
+                const percent = (val - minVal) / range;
+                // Subtract from maxY because SVG Y-axis is inverted
+                currentY = Math.round(maxY - (percent * height));
+            }
+
+            // Move for the first point, Line for all subsequent points
+            if (index === 0) {
+                path += `M ${currentX} ${currentY}`;
+            } else {
+                path += ` L ${currentX} ${currentY}`;
+            }
+        });
+
+        return path;
     }
 
     private getEmptyKpis(): KpiCard[] {
