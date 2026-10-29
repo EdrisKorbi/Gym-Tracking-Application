@@ -20,11 +20,22 @@ export class AdminService {
      * GET /api/v1/admin/users
      * Retrieves a paginated list of users.
      */
-    getAllUsers(page: number = 0, size: number = 20, sort: string = 'createdAt,desc'): Observable<ApiResponse<Page<User>>> {
-        const params = new HttpParams()
+    getAllUsers(
+        page: number = 0,
+        size: number = 10,
+        search: string = ''
+    ): Observable<ApiResponse<Page<User>>> {
+        let params = new HttpParams()
             .set('page', page.toString())
             .set('size', size.toString())
-            .set('sort', sort);
+            .append('sort', 'role,asc')       // 1st Priority: ADMIN before USER
+            .append('sort', 'isActive,desc')  // 2nd Priority: Active before Suspended
+            .append('sort', 'createdAt,desc'); // 3rd Priority: Newest first
+
+        const trimmed = search.trim();
+        if (trimmed) {
+            params = params.set('search', trimmed);
+        }
 
         return this.http.get<ApiResponse<Page<User>>>(this.apiUrl, { params });
     }

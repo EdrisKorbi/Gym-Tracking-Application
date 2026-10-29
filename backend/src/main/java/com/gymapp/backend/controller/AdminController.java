@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.data.web.SortDefault;
 
 import java.util.UUID;
 
@@ -33,8 +34,14 @@ public class AdminController {
     @GetMapping
     public ResponseEntity<ApiResponse<Page<UserResponseDTO>>> getAllUsers(
             @AuthenticationPrincipal CustomUserDetails currentAdmin,
-            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
-        Page<UserResponseDTO> usersPage = userService.getAllUsers(pageable);
+            @RequestParam(required = false) String search,
+            @PageableDefault(size = 10)
+            @SortDefault.SortDefaults({
+                    @SortDefault(sort = "role", direction = Sort.Direction.ASC),
+                    @SortDefault(sort = "isActive", direction = Sort.Direction.DESC),
+                    @SortDefault(sort = "createdAt", direction = Sort.Direction.DESC)
+            }) Pageable pageable) {
+        Page<UserResponseDTO> usersPage = userService.getAllUsers(search, pageable);
         return ResponseEntity.ok(
                 ApiResponse.success("Users retrieved successfully", usersPage)
         );

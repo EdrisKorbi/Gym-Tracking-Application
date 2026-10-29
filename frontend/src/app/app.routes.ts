@@ -18,12 +18,12 @@ export const routes: Routes = [
         path: '',
         loadComponent: () => import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent),
         canActivate: [authGuard],
-        // NEW: Enterprise Child Routes
+        // Enterprise Child Routes
         children: [
             {
                 path: '',
                 redirectTo: 'overview',
-                pathMatch: 'full' // Redirects localhost:4200/ immediately to /overview
+                pathMatch: 'full'
             },
             {
                 path: 'overview',
@@ -32,13 +32,13 @@ export const routes: Routes = [
             {
                 path: 'workouts',
                 loadComponent: () => import('./features/workouts/workouts.component').then(m => m.WorkoutsComponent)
+            },
+            {
+                path: 'admin',
+                loadComponent: () => import('./features/admin/admin-users/admin-users.component').then(m => m.AdminUsersComponent),
+                canActivate: [adminGuard]
             }
         ]
-    },
-    {
-        path: 'admin',
-        loadComponent: () => import('./features/admin/admin-users/admin-users.component').then(m => m.AdminUsersComponent),
-        canActivate: [adminGuard]
     },
     {
         path: '**',

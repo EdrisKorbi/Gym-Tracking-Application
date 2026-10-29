@@ -69,9 +69,13 @@ public class UserService {
 
     // --- ADMIN METHODS ---
 
-    public Page<UserResponseDTO> getAllUsers(Pageable pageable) {
-        // .map() automatically converts the Page<User> from the DB into a Page<UserResponseDTO>
-        return userRepository.findAll(pageable).map(this::mapToDTO);
+    public Page<UserResponseDTO> getAllUsers(String search, Pageable pageable) {
+        if (search != null && !search.isBlank()) {
+            return userRepository.searchUsers(search.trim(), pageable)
+                    .map(this::mapToDTO); // (use your existing entity-to-DTO mapper method name here)
+        }
+        return userRepository.findAll(pageable)
+                .map(this::mapToDTO);
     }
 
     @Transactional

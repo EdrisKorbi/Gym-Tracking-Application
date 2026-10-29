@@ -1,118 +1,170 @@
-<div class="admin-workspace cascade-item delay-1">
+<!-- Dimmed, blurred background overlay -->
+<div class="modal-backdrop cascade-item" (click)="closeModal()">
 
-    <header class="admin-header">
-        <div>
-            <h1>User Management</h1>
-            <p class="subtitle">Total Registered Users: <strong>{{ totalElements() }}</strong></p>
-        </div>
-        <app-neu-button variant="primary" (clicked)="loadUsers(0)">
-            <span>↻</span> Refresh Data
-        </app-neu-button>
-    </header>
+    <!-- Elevated Neumorphic Card -->
+    <div class="modal-card" (click)="$event.stopPropagation()">
 
-    @if (errorMessage()) {
-    <div class="error-banner neu-raised">
-        <span class="icon">⚠️</span>
-        <p>{{ errorMessage() }}</p>
-        <button class="dismiss-btn" (click)="errorMessage.set(null)">✕</button>
-    </div>
-    }
+        <header class="admin-header">
+            <div class="title-block">
+                <div class="title-row">
+                    <h1>Admin Portal</h1>
+                </div>
+                <p class="subtitle">Manage user roles and security clearances.</p>
+            </div>
+            <div class="header-actions">
+                <div class="search-box neu-inset" [class.is-searching]="isPageLoading() && searchQuery()">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" placeholder="Search name or email..." [value]="searchQuery()"
+                        (input)="onSearchInput($any($event.target).value)" aria-label="Search users by name or email" />
+                    @if (searchQuery()) {
+                    <button class="clear-search-btn" (click)="clearSearch()" aria-label="Clear search">✕</button>
+                    }
+                </div>
 
-    <div class="table-container neu-inset">
-        @if (isPageLoading()) {
-        <div class="loading-overlay">
-            <div class="spinner"></div>
-            <p>Synchronizing with database...</p>
+                <app-neu-button variant="secondary" (clicked)="loadUsers(currentPage())">
+                    ↻ Refresh
+                </app-neu-button>
+                <button class="close-btn" (click)="closeModal()" aria-label="Close">✕</button>
+            </div>
+        </header>
+
+        @if (errorMessage()) {
+        <div class="error-banner neu-inset">
+            <span class="icon">⚠️</span>
+            <p>{{ errorMessage() }}</p>
+            <button class="dismiss-btn" (click)="errorMessage.set(null)">✕</button>
         </div>
         }
 
-        <table class="neu-table">
-            <thead>
-                <tr>
-                    <th>Athlete</th>
-                    <th>Email Address</th>
-                    <th>Joined Date</th>
-                    <th>Role</th>
-                    <th>Status</th>
-                    <th class="actions-col">Security Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Track by ID ensures Angular only re-renders rows that actually change -->
-                @for (user of users(); track user.id) {
-                <tr [class.is-banned]="!user.isActive" [class.is-updating]="updatingUserId() === user.id">
-                    <td class="user-cell">
-                        <div class="avatar neu-raised">
-                            {{ user.firstName.charAt(0) }}{{ user.lastName.charAt(0) }}
-                        </div>
-                        <div class="name-block">
-                            <span class="full-name">{{ user.firstName }} {{ user.lastName }}</span>
-                            @if (isSelf(user.id)) {
-                            <span class="badge self-badge">You</span>
-                            }
-                        </div>
-                    </td>
-                    <td class="mono">{{ user.email }}</td>
-                    <td>{{ user.createdAt | date:'mediumDate' }}</td>
+        <!-- Recessed Well: Pinned Header + Masked Scroll Viewport -->
+        <div class="table-shell neu-inset">
+            @if (isPageLoading() && users().length === 0) {
+            <div class="loading-overlay">
+                <div class="spinner"></div>
+                <p>Synchronizing records...</p>
+            </div>
+            }
 
-                    <!-- Role Badge -->
-                    <td>
-                        <span class="role-badge" [class.admin]="user.role === 'ADMIN'">
-                            {{ user.role }}
-                        </span>
-                    </td>
+            <!-- Pinned Column Headers (Never scrolls away) -->
+            <div class="table-header-bar">
+                <table class="neu-table">
+                    <colgroup>
+                        <col class="col-athlete">
+                        <col class="col-email">
+                        <col class="col-joined">
+                        <col class="col-role">
+                        <col class="col-status">
+                        <col class="col-actions">
+                    </colgroup>
+                    <thead>
+                        <tr>
+                            <th>Athlete</th>
+                            <th>Email Address</th>
+                            <th>Joined</th>
+                            <th>Role</th>
+                            <th>Status</th>
+                            <th class="actions-col">Actions</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
 
-                    <!-- Status Badge -->
-                    <td>
-                        <div class="status-indicator">
-                            <span class="dot" [class.active]="user.isActive" [class.banned]="!user.isActive"></span>
-                            {{ user.isActive ? 'Active' : 'Suspended' }}
-                        </div>
-                    </td>
+            <!-- Scrollable Rows with Top/Bottom Ceiling Fade -->
+            <div class="table-scroll-viewport" [class.is-refetching]="isPageLoading() && users().length > 0">
+                <table class="neu-table">
+                    <colgroup>
+                        <col class="col-athlete">
+                        <col class="col-email">
+                        <col class="col-joined">
+                        <col class="col-role">
+                        <col class="col-status">
+                        <col class="col-actions">
+                    </colgroup>
+                    <tbody [class.cascade-alt]="cascadeFlip()">
+                        @for (user of users(); track user.id; let i = $index) {
+                        <tr [style.--row-index]="i" [class.is-banned]="!user.isActive"
+                            [class.is-updating]="updatingUserId() === user.id">
+                            <td class="user-cell">
+                                <div class="avatar">
+                                    {{ user.firstName.charAt(0) }}{{ user.lastName.charAt(0) }}
+                                </div>
+                                <div class="name-block">
+                                    <!-- NEW: Hover Reveal for Name -->
+                                    <div class="hover-reveal-wrapper full-name">
+                                        <span class="visible-text">{{ user.firstName }} {{ user.lastName }}</span>
+                                        <span class="hidden-pill">{{ user.firstName }} {{ user.lastName }}</span>
+                                    </div>
 
-                    <!-- Action Buttons -->
-                    <td class="actions-col">
-                        <div class="action-group">
-                            <!-- Role Toggle -->
-                            <button class="neu-action-btn" [disabled]="isSelf(user.id) || updatingUserId() !== null"
-                                (click)="toggleUserRole(user)"
-                                [title]="user.role === 'ADMIN' ? 'Demote to User' : 'Promote to Admin'">
-                                {{ user.role === 'ADMIN' ? '↓ Demote' : '↑ Promote' }}
-                            </button>
+                                    @if (isSelf(user.id)) {
+                                    <span class="self-badge">You</span>
+                                    }
+                                </div>
+                            </td>
 
-                            <!-- Ban Toggle -->
-                            <button class="neu-action-btn danger"
-                                [disabled]="isSelf(user.id) || updatingUserId() !== null"
-                                (click)="toggleUserStatus(user)"
-                                [title]="user.isActive ? 'Suspend Account' : 'Reactivate Account'">
-                                {{ user.isActive ? '⊘ Ban' : '✓ Unban' }}
-                            </button>
-                        </div>
-                    </td>
-                </tr>
-                } @empty {
-                <tr>
-                    <td colspan="6" class="empty-state">No users found in the system.</td>
-                </tr>
-                }
-            </tbody>
-        </table>
-    </div>
-
-    <!-- Pagination Controls -->
-    <footer class="pagination-footer">
-        <p class="page-info">
-            Page {{ currentPage() + 1 }} of {{ totalPages() || 1 }}
-        </p>
-        <div class="page-controls">
-            <app-neu-button variant="secondary" [disabled]="currentPage() === 0 || isPageLoading()"
-                (clicked)="goToPreviousPage()">
-                ← Previous
-            </app-neu-button>
-            <app-neu-button variant="secondary" [disabled]="currentPage() >= totalPages() - 1 || isPageLoading()"
-                (clicked)="goToNextPage()">
-                Next →
-            </app-neu-button>
+                            <td class="email-cell">
+                                <!-- NEW: Hover Reveal for Email -->
+                                <div class="hover-reveal-wrapper">
+                                    <span class="visible-text">{{ user.email }}</span>
+                                    <span class="hidden-pill">{{ user.email }}</span>
+                                </div>
+                            </td>
+                            <td class="date-cell">{{ user.createdAt | date:'MMM d, yyyy' }}</td>
+                            <td>
+                                <span class="role-badge" [class.admin]="user.role === 'ADMIN'">
+                                    {{ user.role }}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="status-indicator">
+                                    <span class="dot" [class.active]="user.isActive"
+                                        [class.banned]="!user.isActive"></span>
+                                    {{ user.isActive ? 'Active' : 'Suspended' }}
+                                </div>
+                            </td>
+                            <td class="actions-col">
+                                <div class="action-group">
+                                    <button class="neu-action-btn"
+                                        [disabled]="isSelf(user.id) || updatingUserId() !== null"
+                                        (click)="toggleUserRole(user)">
+                                        {{ user.role === 'ADMIN' ? '↓ Demote' : '↑ Promote' }}
+                                    </button>
+                                    <button class="neu-action-btn danger"
+                                        [disabled]="isSelf(user.id) || updatingUserId() !== null"
+                                        (click)="toggleUserStatus(user)">
+                                        {{ user.isActive ? '⊘ Ban' : '✓ Unban' }}
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        } @empty {
+                        <tr>
+                            <td colspan="6" class="empty-state">No users found in the system.</td>
+                        </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
         </div>
-    </footer>
+
+        <footer class="pagination-footer">
+            <div class="page-info">
+                <span>
+                    Showing <strong>{{ rangeStart() }}–{{ rangeEnd() }}</strong> of <strong>{{ totalElements()
+                        }}</strong> users
+                </span>
+                <span class="divider">•</span>
+                <span>Page {{ currentPage() + 1 }} of {{ totalPages() || 1 }}</span>
+            </div>
+            <div class="page-controls">
+                <app-neu-button variant="secondary" [disabled]="currentPage() === 0 || isPageLoading()"
+                    (clicked)="goToPreviousPage()">
+                    ← Prev
+                </app-neu-button>
+                <app-neu-button variant="secondary" [disabled]="currentPage() >= totalPages() - 1 || isPageLoading()"
+                    (clicked)="goToNextPage()">
+                    Next →
+                </app-neu-button>
+            </div>
+        </footer>
+    </div>
 </div>

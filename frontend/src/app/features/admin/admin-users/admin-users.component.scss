@@ -1,91 +1,329 @@
-.admin-workspace {
-    padding: 2rem;
-    max-width: 1400px;
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
+/* ==========================================================================
+   Theme-Aware Local Shadow Tokens (Eliminates Dark Mode White Glow)
+   ========================================================================== */
+:host {
+    --modal-backdrop-bg: rgba(15, 23, 42, 0.28);
+    --modal-card-shadow: 0 24px 48px rgba(15, 23, 42, 0.16),
+        8px 8px 20px rgba(163, 177, 198, 0.35),
+        -8px -8px 20px rgba(255, 255, 255, 0.8);
+    --row-shadow: 3px 3px 7px rgba(163, 177, 198, 0.35),
+        -3px -3px 7px rgba(255, 255, 255, 0.75);
+    --ctrl-shadow: 3px 3px 6px rgba(163, 177, 198, 0.4),
+        -3px -3px 6px rgba(255, 255, 255, 0.8);
+    --ctrl-shadow-inset: inset 2px 2px 5px rgba(163, 177, 198, 0.45),
+        inset -2px -2px 5px rgba(255, 255, 255, 0.8);
+    --badge-shadow-inset: inset 1.5px 1.5px 3px rgba(163, 177, 198, 0.4),
+        inset -1.5px -1.5px 3px rgba(255, 255, 255, 0.75);
+    --overlay-bg: rgba(240, 244, 248, 0.72);
+    --row-border: rgba(255, 255, 255, 0.5);
+    --scrollbar-thumb: rgba(100, 116, 139, 0.25);
+    --banned-row-bg: #e6ebf2;
+    --banned-row-shadow: inset 2px 2px 4px rgba(163, 177, 198, 0.35),
+        inset -2px -2px 4px rgba(255, 255, 255, 0.7);
 }
 
+:host-context([data-theme="dark"]) {
+    --modal-backdrop-bg: rgba(0, 0, 0, 0.6);
+    --modal-card-shadow: 0 28px 60px rgba(0, 0, 0, 0.75),
+        8px 8px 22px rgba(0, 0, 0, 0.6),
+        -6px -6px 16px rgba(255, 255, 255, 0.025);
+    --row-shadow: 4px 4px 9px rgba(0, 0, 0, 0.55),
+        -2px -2px 6px rgba(255, 255, 255, 0.025);
+    --ctrl-shadow: 3px 3px 7px rgba(0, 0, 0, 0.6),
+        -2px -2px 5px rgba(255, 255, 255, 0.03);
+    --ctrl-shadow-inset: inset 2px 2px 5px rgba(0, 0, 0, 0.65),
+        inset -2px -2px 4px rgba(255, 255, 255, 0.03);
+    --badge-shadow-inset: inset 2px 2px 4px rgba(0, 0, 0, 0.6),
+        inset -1px -1px 3px rgba(255, 255, 255, 0.03);
+    --overlay-bg: rgba(18, 22, 29, 0.78);
+    --row-border: rgba(255, 255, 255, 0.04);
+    --scrollbar-thumb: rgba(255, 255, 255, 0.16);
+    --banned-row-bg: #141820;
+    --banned-row-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.65),
+        inset -1px -1px 3px rgba(255, 255, 255, 0.02);
+}
+
+/* ==========================================================================
+   Modal Backdrop & Compact Pop-Up Card
+   ========================================================================== */
+.modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: var(--modal-backdrop-bg);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+}
+
+.modal-card {
+    width: 100%;
+    max-width: 950px;
+    height: min(620px, 78vh);
+    background: var(--bg-color);
+    border: 1px solid var(--row-border);
+    border-radius: 24px;
+    padding: 1.4rem 1.65rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    overflow: hidden;
+    box-shadow: var(--modal-card-shadow);
+    animation: scaleIn 0.22s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes scaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.96) translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+/* ==========================================================================
+   Compact Header & Close Button
+   ========================================================================== */
 .admin-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
 
-    h1 {
-        font-size: 1.75rem;
-        color: var(--text-color);
-        margin: 0 0 0.25rem 0;
+    .title-block {
+        display: flex;
+        flex-direction: column;
+        gap: 0.2rem;
+    }
+
+    .title-row {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+
+        h1 {
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: var(--text-color);
+            margin: 0;
+            letter-spacing: -0.3px;
+        }
+
+        .count-pill {
+            background: rgba(59, 130, 246, 0.14);
+            color: var(--accent-color);
+            padding: 0.2rem 0.65rem;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
     }
 
     .subtitle {
         color: var(--text-muted);
         margin: 0;
-        font-size: 0.95rem;
+        font-size: 0.84rem;
+    }
 
-        strong {
-            color: var(--accent-color);
+    .header-actions {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .search-box {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.42rem 0.85rem;
+        border-radius: 999px;
+        width: 240px;
+        background: var(--bg-color);
+        box-shadow: var(--ctrl-shadow-inset);
+        transition: width 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+
+        &:focus-within {
+            width: 280px;
+        }
+
+        .search-icon {
+            font-size: 0.8rem;
+            opacity: 0.6;
+            user-select: none;
+            transition: transform 0.2s ease, opacity 0.2s ease;
+        }
+
+        &.is-searching .search-icon {
+            opacity: 1;
+            animation: searchPulse 0.8s ease-in-out infinite alternate;
+        }
+
+        input {
+            border: none;
+            background: transparent;
+            color: var(--text-color);
+            font-size: 0.82rem;
+            font-weight: 500;
+            width: 100%;
+            outline: none;
+
+            &::placeholder {
+                color: var(--text-muted);
+                opacity: 0.7;
+            }
+        }
+
+        .clear-search-btn {
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            cursor: pointer;
+            padding: 0 0.15rem;
+            line-height: 1;
+
+            &:hover {
+                color: var(--text-color);
+            }
         }
     }
 }
 
-.error-banner {
+.close-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: none;
+    background: var(--bg-color);
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    font-weight: 600;
     display: flex;
     align-items: center;
-    gap: 1rem;
-    padding: 1rem 1.5rem;
-    background: rgba(231, 76, 60, 0.1);
-    border-left: 4px solid #e74c3c;
-    border-radius: 12px;
-    color: #e74c3c;
-    font-weight: 500;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: var(--ctrl-shadow);
+    transition: all 0.15s ease;
 
-    .dismiss-btn {
-        margin-left: auto;
-        background: none;
-        border: none;
-        color: inherit;
-        font-size: 1.25rem;
-        cursor: pointer;
-        opacity: 0.7;
-        transition: opacity 0.2s;
-
-        &:hover {
-            opacity: 1;
-        }
+    &:hover {
+        color: var(--text-color);
+        box-shadow: var(--ctrl-shadow-inset);
     }
 }
 
-.table-container {
-    border-radius: 20px;
-    padding: 1rem;
-    overflow-x: auto;
+/* ==========================================================================
+   Recessed Table Shell (Pinned Header + Masked Scroll Viewport)
+   ========================================================================== */
+.table-shell {
+    border-radius: 18px;
+    padding: 0.65rem 0.85rem 0.5rem;
     position: relative;
-    min-height: 400px;
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 260px;
+
+    /* NEW: Allow horizontal swiping on small screens */
+    overflow-x: auto;
+    overflow-y: hidden;
+
+    /* NEW: Custom horizontal scrollbar */
+    &::-webkit-scrollbar {
+        height: 6px;
+    }
+
+    &::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background: var(--scrollbar-thumb);
+        border-radius: 999px;
+    }
+}
+
+.table-header-bar {
+    padding: 0 0.4rem 0.25rem;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+    flex-shrink: 0;
+
+    /* NEW: Lock minimum width to force sliding */
+    min-width: 850px;
+}
+
+.table-scroll-viewport {
+    overflow-y: auto;
+    overflow-x: hidden;
+    flex: 1 1 auto;
+    padding: 0.45rem 0.4rem 0.65rem;
+    transition: opacity 0.18s ease;
+
+    /* NEW: Lock minimum width to force the parent shell to slide */
+    min-width: 850px;
+
+    &.is-refetching {
+        opacity: 0.55;
+        pointer-events: none;
+    }
+
+
+
+    /* Smoothly dissolves rows before they hit the top ceiling or bottom floor */
+    mask-image: linear-gradient(to bottom,
+        transparent 0%,
+        #000 12px,
+        #000 calc(100% - 12px),
+        transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom,
+        transparent 0%,
+        #000 12px,
+        #000 calc(100% - 12px),
+        transparent 100%);
+
+    &::-webkit-scrollbar {
+        width: 5px;
+    }
+
+    &::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background: var(--scrollbar-thumb);
+        border-radius: 999px;
+    }
+
+
 }
 
 .loading-overlay {
     position: absolute;
     inset: 0;
-    background: rgba(var(--bg-color-rgb), 0.7);
+    background: var(--overlay-bg);
     backdrop-filter: blur(4px);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 1rem;
+    gap: 0.75rem;
     z-index: 10;
-    border-radius: 20px;
+    border-radius: 18px;
     color: var(--text-muted);
-    font-weight: 500;
+    font-size: 0.85rem;
+    font-weight: 600;
 
     .spinner {
-        width: 40px;
-        height: 40px;
-        border: 4px solid var(--border-color);
+        width: 32px;
+        height: 32px;
+        border: 3px solid var(--border-color);
         border-top-color: var(--accent-color);
         border-radius: 50%;
-        animation: spin 1s linear infinite;
+        animation: spin 0.8s linear infinite;
     }
 }
 
@@ -95,58 +333,144 @@
     }
 }
 
-.neu-table {
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 0 0.5rem;
-    text-align: left;
-
-    th {
-        padding: 1rem 1.5rem;
-        color: var(--text-muted);
-        font-weight: 600;
-        font-size: 0.85rem;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        border-bottom: 1px solid var(--border-color);
+@keyframes rowCascadeIn {
+    0% {
+        opacity: 0;
+        transform: translateY(16px);
     }
 
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes rowCascadeInAlt {
+    0% {
+        opacity: 0;
+        transform: translateY(16px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes searchPulse {
+    from {
+        transform: scale(0.92);
+    }
+
+    to {
+        transform: scale(1.12);
+    }
+}
+
+/* ==========================================================================
+   Fixed-Ratio Neumorphic Table (All 6 Columns Always Visible)
+   ========================================================================== */
+.neu-table {
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: separate;
+    border-spacing: 0 0.45rem;
+    text-align: center;
+
+    /* Strict 100% Column Budget */
+    .col-athlete {
+        width: 22%;
+    }
+
+    .col-email {
+        width: 25%;
+    }
+
+    .col-joined {
+        width: 13%;
+    }
+
+    .col-role {
+        width: 9%;
+    }
+
+    .col-status {
+        width: 12%;
+    }
+
+    .col-actions {
+        width: 19%;
+    }
+
+    th {
+        padding: 0.2rem 0.6rem;
+        color: var(--text-muted);
+        font-weight: 700;
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        white-space: nowrap;
+    }
+
+
+
     td {
-        padding: 1.25rem 1.5rem;
-        background: var(--bg-color);
+        padding: 0.5rem 0.6rem;
+        background: transparent;
         color: var(--text-color);
-        transition: background 0.2s, opacity 0.2s;
-        border-top: 1px solid rgba(255, 255, 255, 0.4);
-        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        font-size: 0.82rem;
+        white-space: nowrap;
+        vertical-align: middle;
+        transition: opacity 0.2s;
 
         &:first-child {
-            border-top-left-radius: 16px;
-            border-bottom-left-radius: 16px;
-            border-left: 1px solid rgba(255, 255, 255, 0.4);
+            border-top-left-radius: 12px;
+            border-bottom-left-radius: 12px;
         }
 
         &:last-child {
-            border-top-right-radius: 16px;
-            border-bottom-right-radius: 16px;
-            border-right: 1px solid rgba(0, 0, 0, 0.05);
+            border-top-right-radius: 12px;
+            border-bottom-right-radius: 12px;
         }
     }
 
-    /* Row States */
-    tr {
-        box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.03),
-            -4px -4px 10px rgba(255, 255, 255, 0.4);
-        transition: transform 0.2s, box-shadow 0.2s;
+    tbody.cascade-alt tr {
+        animation-name: rowCascadeInAlt;
+    }
 
-        &:hover {
-            transform: translateY(-1px);
-            box-shadow: 6px 6px 12px rgba(0, 0, 0, 0.05),
-                -6px -6px 12px rgba(255, 255, 255, 0.6);
-        }
+    tbody tr {
+        border-radius: 12px;
+        background: transparent;
+        /* Layer 1: Outer raised shadow | Layer 2: Rounded solid fill */
+        box-shadow: var(--row-shadow), inset 0 0 0 100px var(--bg-color);
+        animation: rowCascadeIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+        animation-delay: calc(var(--row-index, 0) * 35ms);
 
-        &.is-banned td {
-            background: rgba(231, 76, 60, 0.05);
-            color: var(--text-muted);
+        &.is-banned {
+            background: transparent;
+            /* Layer 1: Pushed-in bevel shadow on top | Layer 2: Rounded banned fill underneath */
+            box-shadow: var(--banned-row-shadow), inset 0 0 0 100px var(--banned-row-bg);
+
+            .hover-reveal-wrapper .visible-text {
+                color: var(--text-muted);
+            }
+
+            .avatar {
+                color: var(--text-muted);
+                box-shadow: var(--badge-shadow-inset);
+            }
+
+            .full-name,
+            .email-pill {
+                color: var(--text-muted);
+            }
+
+            .status-indicator {
+                color: #ef4444;
+                background: rgba(239, 68, 68, 0.1);
+                padding: 0.18rem 0.55rem;
+                border-radius: 999px;
+            }
         }
 
         &.is-updating {
@@ -156,118 +480,203 @@
     }
 }
 
-/* Cell Contents */
+/* ==========================================================================
+   Cell Contents & Compact Badges
+   ========================================================================== */
 .user-cell {
     display: flex;
     align-items: center;
-    gap: 1rem;
+    justify-content: flex-start;
+    padding-left: 1.35rem !important;
+    gap: 0.6rem;
 
     .avatar {
-        width: 42px;
-        height: 42px;
+        width: 30px;
+        height: 30px;
+        flex-shrink: 0;
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
         font-weight: 700;
-        font-size: 0.9rem;
+        font-size: 0.72rem;
         color: var(--accent-color);
         background: var(--bg-color);
+        box-shadow: var(--ctrl-shadow);
     }
 
     .name-block {
         display: flex;
-        flex-direction: column;
-        gap: 0.2rem;
-    }
+        align-items: center;
+        gap: 0.4rem;
+        min-width: 0;
 
-    .full-name {
-        font-weight: 600;
+        /* NEW: The Magic Push! When the hover wrapper is triggered, slide the adjacent badge */
+        .hover-reveal-wrapper:hover+.self-badge {
+            transform: translateX(0.55rem);
+            /* Just enough to clear the pop-up's padding */
+        }
     }
 
     .self-badge {
-        font-size: 0.7rem;
-        background: var(--accent-color);
-        color: white;
-        padding: 0.1rem 0.4rem;
+        flex-shrink: 0;
+        font-size: 0.62rem;
+        text-transform: uppercase;
+        background: rgba(59, 130, 246, 0.14);
+        color: var(--accent-color);
+        padding: 0.1rem 0.38rem;
         border-radius: 4px;
-        width: max-content;
+        font-weight: 700;
+        /* NEW: Hardware-accelerated smooth spring animation */
+        transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1);
     }
 }
 
-.mono {
-    font-family: 'Fira Code', 'Courier New', monospace;
-    font-size: 0.9rem;
+/* ==========================================================================
+   Hover Reveal Pill (Perfectly Centered & Left-Aligned Overrides)
+   ========================================================================== */
+.hover-reveal-wrapper {
+    position: relative;
+    display: block;
+    min-width: 0;
+
+    .visible-text {
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .hidden-pill {
+        position: absolute;
+        /* Default: Perfect Dead-Center Alignment for Email Column */
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+
+        width: max-content;
+        padding: 0.35rem 0.75rem;
+        background: var(--bg-color);
+        color: var(--text-color);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3), var(--ctrl-shadow);
+        border: 1px solid rgba(148, 163, 184, 0.15);
+        border-radius: 8px;
+        user-select: all;
+        cursor: text;
+        z-index: 50;
+
+        /* Hidden state */
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.15s ease, visibility 0.15s ease;
+    }
+
+    &:hover {
+        z-index: 50;
+
+        .hidden-pill {
+            opacity: 1;
+            visibility: visible;
+        }
+    }
+
+    /* Override specifically for the Athlete column to protect the Avatar & YOU badge */
+    &.full-name {
+        font-weight: 600;
+        font-size: 0.83rem;
+
+        .hidden-pill {
+            /* Anchor to the left text boundary */
+            left: -0.4rem;
+            transform: translateY(-50%);
+            /* Reduced padding perfectly bridges the 0.4rem gap without overlapping */
+            padding: 0.25rem 0.4rem;
+        }
+    }
+}
+
+.email-cell {
+    font-family: inherit;
+    font-size: 0.81rem;
+    font-weight: 500;
+    color: var(--text-color);
+}
+
+.date-cell {
+    font-size: 0.8rem;
     color: var(--text-muted);
 }
 
 .role-badge {
-    padding: 0.4rem 0.8rem;
-    border-radius: 8px;
-    font-size: 0.8rem;
+    display: inline-block;
+    padding: 0.2rem 0.5rem;
+    border-radius: 6px;
+    font-size: 0.68rem;
     font-weight: 700;
-    background: rgba(0, 0, 0, 0.05);
     color: var(--text-muted);
-    box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.05),
-        inset -2px -2px 5px rgba(255, 255, 255, 0.5);
+    box-shadow: var(--badge-shadow-inset);
 
     &.admin {
         color: var(--accent-color);
-        background: rgba(var(--accent-color-rgb), 0.1);
+        background: rgba(59, 130, 246, 0.1);
     }
 }
 
 .status-indicator {
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    gap: 0.5rem;
-    font-weight: 500;
-    font-size: 0.9rem;
+    gap: 0.4rem;
+    font-weight: 600;
+    font-size: 0.8rem;
 
     .dot {
-        width: 8px;
-        height: 8px;
+        width: 7px;
+        height: 7px;
+        flex-shrink: 0;
         border-radius: 50%;
 
         &.active {
             background: #2ecc71;
-            box-shadow: 0 0 8px rgba(46, 204, 113, 0.6);
+            box-shadow: 0 0 6px rgba(46, 204, 113, 0.5);
         }
 
         &.banned {
             background: #e74c3c;
-            box-shadow: 0 0 8px rgba(231, 76, 60, 0.6);
+            box-shadow: 0 0 6px rgba(231, 76, 60, 0.5);
         }
     }
 }
 
+/* ==========================================================================
+   Compact Single-Line Action Buttons
+   ========================================================================== */
 .actions-col {
-    text-align: right;
+    text-align: center;
 }
 
 .action-group {
-    display: flex;
-    gap: 0.5rem;
-    justify-content: flex-end;
+    display: inline-flex;
+    gap: 0.4rem;
+    justify-content: center;
+    align-items: center;
 }
 
 .neu-action-btn {
-    padding: 0.5rem 1rem;
+    padding: 0.32rem 0.55rem;
     border: none;
-    border-radius: 10px;
-    font-size: 0.85rem;
-    font-weight: 600;
+    border-radius: 8px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    white-space: nowrap;
     cursor: pointer;
     background: var(--bg-color);
-    color: var(--text-color);
-    box-shadow: 3px 3px 6px rgba(0, 0, 0, 0.05),
-        -3px -3px 6px rgba(255, 255, 255, 0.5);
-    transition: all 0.2s ease;
+    color: var(--text-muted);
+    box-shadow: var(--ctrl-shadow);
+    transition: all 0.15s ease;
 
     &:hover:not(:disabled) {
-        box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.05),
-            inset -2px -2px 5px rgba(255, 255, 255, 0.5);
-        color: var(--accent-color);
+        box-shadow: var(--ctrl-shadow-inset);
+        color: var(--text-color);
     }
 
     &.danger:hover:not(:disabled) {
@@ -275,16 +684,47 @@
     }
 
     &:disabled {
-        opacity: 0.4;
+        opacity: 0.32;
         cursor: not-allowed;
         box-shadow: none;
-        border: 1px solid var(--border-color);
+    }
+}
+
+/* ==========================================================================
+   Error Banner & Footer
+   ========================================================================== */
+.error-banner {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.65rem 1rem;
+    color: #e74c3c;
+    font-size: 0.84rem;
+    font-weight: 600;
+    border-radius: 12px;
+
+    p {
+        margin: 0;
+    }
+
+    .dismiss-btn {
+        margin-left: auto;
+        background: none;
+        border: none;
+        color: inherit;
+        font-size: 1rem;
+        cursor: pointer;
+        opacity: 0.7;
+
+        &:hover {
+            opacity: 1;
+        }
     }
 }
 
 .empty-state {
     text-align: center;
-    padding: 3rem !important;
+    padding: 2.5rem 1rem !important;
     color: var(--text-muted);
     font-style: italic;
 }
@@ -293,15 +733,29 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0 1rem;
+    padding-top: 0.25rem;
 
     .page-info {
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.55rem;
+        font-size: 0.82rem;
         font-weight: 500;
         color: var(--text-muted);
+
+        strong {
+            color: var(--text-color);
+            font-weight: 700;
+        }
+
+        .divider {
+            opacity: 0.4;
+        }
     }
 
     .page-controls {
         display: flex;
-        gap: 1rem;
+        gap: 0.65rem;
     }
 }

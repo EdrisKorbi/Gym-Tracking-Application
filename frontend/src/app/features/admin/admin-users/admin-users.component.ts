@@ -1,12 +1,16 @@
-import { Component, inject, OnInit, signal, computed } from '@angular/core';
+import { Component, inject, OnInit, signal, computed, HostListener, DestroyRef } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { finalize } from 'rxjs/operators';
+import { Router } from '@angular/router';
 
 import { AdminService } from '../../../core/services/admin.service';
 import { UserService } from '../../../core/services/user.service';
 import { User } from '../../../core/models/user.model';
 import { NeuButtonComponent } from '../../../shared/ui/neu-button/neu-button.component';
+
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged, finalize } from 'rxjs/operators';
 
 @Component({
   selector: 'app-admin-users',
@@ -18,6 +22,11 @@ import { NeuButtonComponent } from '../../../shared/ui/neu-button/neu-button.com
 export class AdminUsersComponent implements OnInit {
   private readonly adminService = inject(AdminService);
   private readonly userService = inject(UserService);
+  private readonly router = inject(Router); // NEW: Inject Router for modal dismissal
+  private readonly destroyRef = inject(DestroyRef);
+
+  searchQuery = signal<string>('');
+  private readonly searchSubject = new Subject<string>();
 
   // --- Core State ---
   currentAdminId = signal<string | null>(null);
@@ -25,23 +34,59 @@ export class AdminUsersComponent implements OnInit {
 
   // --- Pagination State ---
   currentPage = signal<number>(0);
-  pageSize = signal<number>(20);
+  pageSize = signal<number>(10);
   totalElements = signal<number>(0);
   totalPages = signal<number>(0);
 
+  // --- Computed Pagination Range (e.g., Showing 1–10 of 15) ---
+  rangeStart = computed(() =>
+    this.totalElements() === 0 ? 0 : this.currentPage() * this.pageSize() + 1
+  );
+  rangeEnd = computed(() =>
+    Math.min((this.currentPage() + 1) * this.pageSize(), this.totalElements())
+  );
+
   // --- UI Loading & Error State ---
   isPageLoading = signal<boolean>(true);
-  updatingUserId = signal<string | null>(null); // Mutex lock for row-level actions
+  updatingUserId = signal<string | null>(null);
   errorMessage = signal<string | null>(null);
+  cascadeFlip = signal<boolean>(false);
 
   ngOnInit(): void {
+    this.searchSubject.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe(() => {
+      this.currentPage.set(0);
+      this.loadUsers(0);
+    });
+
     this.initializeAdminContext();
   }
 
-  /**
-   * Initializes the view by fetching the current admin's profile (for self-protection logic)
-   * and then loading the first page of users.
-   */
+  onSearchInput(value: string): void {
+    this.searchQuery.set(value);
+    this.searchSubject.next(value);
+  }
+
+  clearSearch(): void {
+    if (!this.searchQuery()) return;
+    this.searchQuery.set('');
+    this.searchSubject.next('');
+  }
+
+  // NEW: Enterprise UX - Close modal on Escape key press
+  @HostListener('window:keydown.escape')
+  onEscKey(): void {
+    this.closeModal();
+  }
+
+  // NEW: Routing logic to exit the portal
+  closeModal(): void {
+    this.router.navigate(['/overview']);
+  }
+
   private initializeAdminContext(): void {
     this.userService.getProfile().subscribe({
       next: (response) => {
@@ -55,19 +100,21 @@ export class AdminUsersComponent implements OnInit {
     });
   }
 
-  /**
-   * Fetches a paginated slice of the user base from PostgreSQL.
-   */
   loadUsers(pageIndex: number): void {
     this.isPageLoading.set(true);
     this.errorMessage.set(null);
 
-    this.adminService.getAllUsers(pageIndex, this.pageSize(), 'createdAt,desc')
+    this.adminService.getAllUsers(pageIndex, this.pageSize(), this.searchQuery())
       .pipe(finalize(() => this.isPageLoading.set(false)))
       .subscribe({
         next: (response) => {
-          // CORRECTED: Mapping directly from response.data (which IS the Page<T> object)
+          // If unbanning the last user on Page 2 leaves Page 2 empty, step back to Page 1
+          if (response.data.content.length === 0 && pageIndex > 0) {
+            this.loadUsers(pageIndex - 1);
+            return;
+          }
           this.users.set(response.data.content);
+          this.cascadeFlip.update(v => !v); // <-- Re-triggers staggered CSS row animation
           this.currentPage.set(response.data.number);
           this.totalElements.set(response.data.totalElements);
           this.totalPages.set(response.data.totalPages);
@@ -78,9 +125,6 @@ export class AdminUsersComponent implements OnInit {
       });
   }
 
-  /**
-   * Toggles the active status of a user (Ban / Unban).
-   */
   toggleUserStatus(targetUser: User): void {
     if (this.isSelf(targetUser.id)) return;
 
@@ -91,16 +135,14 @@ export class AdminUsersComponent implements OnInit {
     this.adminService.updateUserStatus(targetUser.id, newStatus)
       .pipe(finalize(() => this.updatingUserId.set(null)))
       .subscribe({
-        next: (response) => this.updateLocalUserRecord(response.data),
+        // Re-fetch current page so unbanned users immediately jump to Page 1
+        next: () => this.loadUsers(this.currentPage()),
         error: (error: HttpErrorResponse) => {
           this.handleError(`Failed to update status for ${targetUser.email}.`, error);
         }
       });
   }
 
-  /**
-   * Promotes a USER to ADMIN, or demotes an ADMIN to USER.
-   */
   toggleUserRole(targetUser: User): void {
     if (this.isSelf(targetUser.id)) return;
 
@@ -111,16 +153,14 @@ export class AdminUsersComponent implements OnInit {
     this.adminService.updateUserRole(targetUser.id, newRole)
       .pipe(finalize(() => this.updatingUserId.set(null)))
       .subscribe({
-        next: (response) => this.updateLocalUserRecord(response.data),
+        // Re-fetch current page so promoted/demoted users jump to their sorted page
+        next: () => this.loadUsers(this.currentPage()),
         error: (error: HttpErrorResponse) => {
           this.handleError(`Failed to update role for ${targetUser.email}.`, error);
         }
       });
   }
 
-  /**
-   * Paginator control handlers.
-   */
   goToNextPage(): void {
     if (this.currentPage() < this.totalPages() - 1) {
       this.loadUsers(this.currentPage() + 1);
@@ -133,21 +173,8 @@ export class AdminUsersComponent implements OnInit {
     }
   }
 
-  /**
-   * Utility check to prevent the current admin from locking themselves out.
-   */
   isSelf(userId: string): boolean {
     return this.currentAdminId() === userId;
-  }
-
-  /**
-   * In-place mutation of the specific user record within the Signal array 
-   * to prevent a full-page re-render.
-   */
-  private updateLocalUserRecord(updatedUser: User): void {
-    this.users.update(currentUsers =>
-      currentUsers.map(u => u.id === updatedUser.id ? updatedUser : u)
-    );
   }
 
   private handleError(contextMessage: string, error: HttpErrorResponse): void {
